@@ -1,0 +1,115 @@
+import * as Dialog from '@radix-ui/react-dialog';
+import { navigate } from 'astro:transitions/client';
+import { Command } from 'cmdk';
+import { useEffect, useState } from 'react';
+import { liveNav, site, social } from '../data/site';
+import { toggleTheme } from '../scripts/theme';
+
+// Opened with ⌘K / Ctrl+K, or by any element with [data-palette-open] (see scripts/ui.ts,
+// which dispatches the 'palette:open' window event).
+export default function CommandPalette() {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((o) => !o);
+      }
+    };
+    const onOpen = () => setOpen(true);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('palette:open', onOpen);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('palette:open', onOpen);
+    };
+  }, []);
+
+  const run = (action: () => void) => {
+    setOpen(false);
+    action();
+  };
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(site.email);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+        setOpen(false);
+      }, 900);
+    } catch {
+      run(() => (location.href = `mailto:${site.email}`));
+    }
+  };
+
+  return (
+    <Command.Dialog open={open} onOpenChange={setOpen} label="Command menu" loop>
+      <Dialog.Title className="sr-only">Command menu</Dialog.Title>
+      <Dialog.Description className="sr-only">Search pages and actions</Dialog.Description>
+      <Command.Input placeholder="Where to? Type a page or an action…" />
+      <Command.List>
+        <Command.Empty>Nothing matches. Try “email” or “theme”.</Command.Empty>
+        <Command.Group heading="Pages">
+          {liveNav.map((item) => (
+            <Item key={item.href} label={item.label} hint={item.href} onSelect={() => run(() => navigate(item.href))} />
+          ))}
+        </Command.Group>
+        <Command.Group heading="Actions">
+          <Item
+            label={copied ? 'Copied to clipboard ✓' : 'Copy email address'}
+            hint={site.email}
+            keywords={['contact', 'mail']}
+            onSelect={copyEmail}
+          />
+          <Item
+            label="Send an email"
+            keywords={['contact', 'mail', 'hire']}
+            onSelect={() => run(() => (location.href = `mailto:${site.email}`))}
+          />
+          <Item
+            label="Toggle light / dark theme"
+            keywords={['dark', 'light', 'mode', 'theme']}
+            onSelect={() => run(() => toggleTheme())}
+          />
+        </Command.Group>
+        <Command.Group heading="Elsewhere">
+          {social.map((link) => (
+            <Item
+              key={link.href}
+              label={link.label}
+              hint="↗"
+              onSelect={() => run(() => window.open(link.href, '_blank', 'noopener'))}
+            />
+          ))}
+        </Command.Group>
+      </Command.List>
+      <div className="flex gap-4 border-t border-border px-4 py-2.5 font-mono text-[0.7rem] text-muted">
+        <span>↑↓ move</span>
+        <span>↵ select</span>
+        <span>esc close</span>
+      </div>
+    </Command.Dialog>
+  );
+}
+
+interface ItemProps {
+  label: string;
+  hint?: string;
+  keywords?: string[];
+  onSelect: () => void;
+}
+
+function Item({ label, hint, keywords, onSelect }: ItemProps) {
+  return (
+    <Command.Item value={label} keywords={keywords} onSelect={onSelect}>
+      <span className="flex-1 truncate">{label}</span>
+      {hint && <span className="hidden truncate font-mono text-xs text-muted sm:inline">{hint}</span>}
+      <span className="cmdk-arrow -translate-x-1 text-accent opacity-0 transition" aria-hidden="true">
+        →
+      </span>
+    </Command.Item>
+  );
+}

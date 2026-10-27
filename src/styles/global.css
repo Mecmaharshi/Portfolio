@@ -1,0 +1,215 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Color tokens. The theme is set on <html data-theme> by the inline script in BaseLayout;
+   the media query covers visitors with JavaScript disabled. */
+:root {
+  color-scheme: light;
+  --bg: #f6f3ee;
+  --surface: #fffdf9;
+  --surface-2: #eeeae2;
+  --text: #1b1915;
+  --muted: #655f55;
+  --border: #e0d9cc;
+  --accent: #e4572e;
+  --accent-ink: #b23f1b;
+  --signal: #5b4bdb;
+  --ok: #1f8a5b;
+  --dot: rgb(27 25 21 / 0.09);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #0d0e12;
+    --surface: #15171d;
+    --surface-2: #1d2028;
+    --text: #ecebe6;
+    --muted: #9b978d;
+    --border: #282b35;
+    --accent: #ff7448;
+    --accent-ink: #ff8f6a;
+    --signal: #a196ff;
+    --ok: #3ccf8e;
+    --dot: rgb(236 235 230 / 0.07);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0d0e12;
+  --surface: #15171d;
+  --surface-2: #1d2028;
+  --text: #ecebe6;
+  --muted: #9b978d;
+  --border: #282b35;
+  --accent: #ff7448;
+  --accent-ink: #ff8f6a;
+  --signal: #a196ff;
+  --ok: #3ccf8e;
+  --dot: rgb(236 235 230 / 0.07);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-signal: var(--signal);
+  --color-ok: var(--ok);
+}
+
+@theme {
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg font-sans text-text antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Faint dot grid, the site's "system diagram" texture */
+  .bg-dots {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .kbd {
+    @apply inline-flex items-center rounded border border-border bg-surface px-1.5 font-mono text-[0.7rem] leading-5 text-muted;
+  }
+  /* Keyboard shortcut hints mean nothing on touchscreens */
+  @media (pointer: coarse) {
+    .kbd {
+      display: none !important;
+    }
+  }
+}
+
+/* Theme toggle: let the circular reveal in scripts/theme.ts replace the default cross-fade */
+html.theme-switching::view-transition-old(root),
+html.theme-switching::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Command palette (cmdk) */
+[cmdk-overlay] {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(2px);
+  animation: cmdk-fade 150ms ease-out;
+}
+[cmdk-dialog] {
+  position: fixed;
+  top: 14vh;
+  left: 50%;
+  z-index: 51;
+  width: min(560px, calc(100vw - 32px));
+  transform: translateX(-50%);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 24px 60px -12px rgb(0 0 0 / 0.35);
+  animation: cmdk-pop 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+[cmdk-input] {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  padding: 16px 18px;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+}
+[cmdk-input]::placeholder {
+  color: var(--muted);
+}
+[cmdk-list] {
+  max-height: min(380px, 55vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+}
+[cmdk-group-heading] {
+  padding: 10px 12px 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+[cmdk-item] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 0.925rem;
+  cursor: pointer;
+  user-select: none;
+}
+[cmdk-item][data-selected='true'] {
+  background: var(--surface-2);
+}
+[cmdk-item][data-selected='true'] .cmdk-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+[cmdk-empty] {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+@keyframes cmdk-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes cmdk-pop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.96);
+  }
+}
