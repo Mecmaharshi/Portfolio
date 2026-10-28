@@ -1,4 +1,5 @@
 import { initCountUp } from './count-up';
+import { isSoundOn, play, toggleSound } from './sound';
 import { toggleTheme } from './theme';
 
 // Bundled scripts run once per visit, so listen on document and match by data attribute:
@@ -10,7 +11,10 @@ document.addEventListener('click', (e) => {
   if (themeButton) {
     const rect = themeButton.getBoundingClientRect();
     toggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+    play('switch');
   }
+
+  if (target.closest('[data-sound-toggle]')) toggleSound();
 
   if (target.closest('[data-palette-open]')) {
     window.dispatchEvent(new Event('palette:open'));
@@ -22,4 +26,12 @@ document.addEventListener('astro:page-load', () => {
     document.querySelectorAll('[data-mod-key]').forEach((el) => (el.textContent = '⌘'));
   }
   initCountUp();
+  syncSoundToggles();
 });
+
+function syncSoundToggles() {
+  document
+    .querySelectorAll('[data-sound-toggle]')
+    .forEach((el) => el.setAttribute('aria-pressed', String(isSoundOn())));
+}
+window.addEventListener('sound:change', syncSoundToggles);

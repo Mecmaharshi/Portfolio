@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { play as playSound } from '../scripts/sound';
 import { diagrams, type DiagramId, type DiagramNode, type Status } from '../data/diagrams';
 
 const NODE_H = 54;
@@ -59,6 +60,8 @@ export default function SystemDiagram({ id, initial = 0 }: { id: DiagramId; init
       else await wait(350);
       if (run.current !== token) return;
       setDone(i + 1);
+      const status = step.status ?? 'ok';
+      playSound(status === 'ok' ? 'ok' : status === 'fallback' ? 'fallback' : 'fail', { step: i });
       await wait(260);
     }
     if (run.current === token) {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { play } from '../scripts/sound';
 
 const TIERS = 3;
 const REQUESTS = 24;
@@ -22,6 +23,8 @@ export default function FallbackToy() {
       return 0;
     });
     setOutcomes(next);
+    // One note per request, in step with the cells popping in: higher tier, higher note
+    next.forEach((o, i) => play(o === 0 ? 'error' : 'ok', { step: 7 - o * 2, at: i * 0.035 }));
     setRound((r) => r + 1);
   };
 

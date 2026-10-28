@@ -147,6 +147,8 @@ const field =
 </BaseLayout>
 
 <script>
+  import { play } from '../../scripts/sound';
+
   document.addEventListener('astro:page-load', () => {
     const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
     if (!form) return;
@@ -168,6 +170,7 @@ const field =
         if (!res.ok) throw new Error(String(res.status));
         form.classList.add('hidden');
         success.classList.remove('hidden');
+        play('chime');
       } catch {
         error.hidden = false;
         button.disabled = false;

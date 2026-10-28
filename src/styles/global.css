@@ -5,6 +5,7 @@
 @plugin '@tailwindcss/typography';
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant sound-on (&:where([data-sound="on"], [data-sound="on"] *));
 
 /* Color tokens. The theme is set on <html data-theme> by the inline script in BaseLayout;
    the media query covers visitors with JavaScript disabled. */

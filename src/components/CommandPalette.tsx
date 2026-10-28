@@ -4,6 +4,7 @@ import { Command } from 'cmdk';
 import { useEffect, useState } from 'react';
 import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
+import { isSoundOn, play, toggleSound } from '../scripts/sound';
 import { toggleTheme } from '../scripts/theme';
 
 // Opened with ⌘K / Ctrl+K, or by any element with [data-palette-open] (see scripts/ui.ts,
@@ -11,6 +12,7 @@ import { toggleTheme } from '../scripts/theme';
 export default function CommandPalette({ index }: { index: SiteIndex }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -20,15 +22,24 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
       }
     };
     const onOpen = () => setOpen(true);
+    const onSound = () => setSoundOn(isSoundOn());
+    onSound();
     document.addEventListener('keydown', onKey);
     window.addEventListener('palette:open', onOpen);
+    window.addEventListener('sound:change', onSound);
     return () => {
       document.removeEventListener('keydown', onKey);
       window.removeEventListener('palette:open', onOpen);
+      window.removeEventListener('sound:change', onSound);
     };
   }, []);
 
+  useEffect(() => {
+    if (open) play('pop');
+  }, [open]);
+
   const run = (action: () => void) => {
+    play('select');
     setOpen(false);
     action();
   };
@@ -86,6 +97,11 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
             label="Toggle light / dark theme"
             keywords={['dark', 'light', 'mode', 'theme']}
             onSelect={() => run(() => toggleTheme())}
+          />
+          <Item
+            label={soundOn ? 'Turn sound effects off' : 'Turn sound effects on'}
+            keywords={['sound', 'audio', 'mute', 'sfx']}
+            onSelect={() => run(toggleSound)}
           />
           <Item
             label="Open the terminal"

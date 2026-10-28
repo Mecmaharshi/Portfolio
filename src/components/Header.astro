@@ -72,6 +72,42 @@ const links = Astro.props.pages.filter((item) => item.href !== '/');
 
       <button
         type="button"
+        data-sound-toggle
+        aria-pressed="false"
+        class="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-text"
+        aria-label="Sound effects"
+        title="Sound effects"
+      >
+        <svg
+          class="size-[18px] sound-on:hidden"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M11 5 6 9H2v6h4l5 4V5Z"></path>
+          <path d="m22 9-6 6M16 9l6 6"></path>
+        </svg>
+        <svg
+          class="hidden size-[18px] sound-on:block"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M11 5 6 9H2v6h4l5 4V5Z"></path>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"></path>
+        </svg>
+      </button>
+
+      <button
+        type="button"
         data-theme-toggle
         class="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-text"
         aria-label="Toggle light and dark theme"

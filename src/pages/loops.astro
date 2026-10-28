@@ -64,6 +64,8 @@ import { site } from '../data/site';
 </BaseLayout>
 
 <script>
+  import { play } from '../scripts/sound';
+
   document.addEventListener('astro:page-load', () => {
     document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
       button.addEventListener('click', async () => {
@@ -71,6 +73,7 @@ import { site } from '../data/site';
         try {
           await navigator.clipboard.writeText(button.dataset.copy!);
           button.textContent = 'copied ✓';
+          play('chime');
         } catch {
           button.textContent = 'copy failed';
         }
