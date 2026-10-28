@@ -10,6 +10,15 @@ const contact = [
   site.url.replace('https://', ''),
   ...social.map((s) => s.href.replace(/^https:\/\/(www\.)?/, '')),
 ];
+
+// Splits a bullet into text and numbers ("65+", "30,000+", "99.9%", "10–15") so the numbers stand out.
+// The lookarounds skip numbers inside names like GPT-4.1, AZ-900 or 3-tier.
+const METRIC = /(?<![\w.\-])(\d[\d,.]*(?:–\d+)?(?:M|k)?\+?%?\+?)(?![\w\-])/g;
+// Only real measurements count: a +, %, range or thousands separator, or a small count ("8 junior developers").
+// That leaves codes like the "504" in "504 failures" alone.
+const isMetric = (n: string) => /[+%–,]/.test(n) || n.length <= 2;
+const parts = (text: string) =>
+  text.split(METRIC).map((part, i) => ({ text: part, metric: i % 2 === 1 && isMetric(part) }));
 ---
 
 <BaseLayout
@@ -23,13 +32,20 @@ const contact = [
       <a
         href={resumePdf}
         download
-        class="inline-flex h-10 items-center gap-2 rounded-lg bg-text px-4 text-sm font-medium text-bg transition hover:-translate-y-0.5"
+        data-download
+        class="btn inline-flex h-10 items-center gap-2 rounded-lg bg-text px-4 text-sm font-medium text-bg transition hover:-translate-y-0.5"
       >
-        Download PDF <span aria-hidden="true">↓</span>
+        <span data-download-label>Download PDF</span>{' '}
+        <span class="arrow-down" aria-hidden="true">
+          ↓
+        </span>
       </a>
     </div>
 
-    <article class="resume mt-6 rounded-2xl border border-border bg-surface p-6 sm:p-10 print:mt-0 print:rounded-none print:border-0 print:p-0">
+    <article
+      data-reveal-group
+      class="resume mt-6 rounded-2xl border border-border bg-surface p-6 sm:p-10 print:mt-0 print:rounded-none print:border-0 print:p-0"
+    >
       <header class="border-b border-border pb-6 text-center print:pb-3">
         <h1 class="font-display text-4xl font-semibold tracking-tight print:text-3xl">{site.name}</h1>
         <p class="mt-2 text-lg print:mt-1 print:text-base">{resume.headline}</p>
@@ -63,7 +79,9 @@ const contact = [
             </div>
             <ul>
               {job.bullets.map((bullet) => (
-                <li>{bullet}</li>
+                <li>
+                  {parts(bullet).map((part) => (part.metric ? <strong class="metric">{part.text}</strong> : part.text))}
+                </li>
               ))}
             </ul>
           </div>
@@ -79,7 +97,9 @@ const contact = [
             </h3>
             <ul>
               {project.bullets.map((bullet) => (
-                <li>{bullet}</li>
+                <li>
+                  {parts(bullet).map((part) => (part.metric ? <strong class="metric">{part.text}</strong> : part.text))}
+                </li>
               ))}
             </ul>
           </div>
@@ -149,6 +169,16 @@ const contact = [
   .resume li::marker {
     color: var(--accent);
   }
+  /* Numbers read at a glance; hovering a bullet sweeps a highlighter under them */
+  .resume .metric {
+    font-weight: 600;
+    color: var(--text);
+    background: linear-gradient(color-mix(in srgb, var(--accent) 25%, transparent) 0 0) 0 90% / 0 40% no-repeat;
+    transition: background-size 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .resume li:hover .metric {
+    background-size: 100% 40%;
+  }
 
   @media print {
     @page {
@@ -180,5 +210,24 @@ const contact = [
     .resume li::marker {
       color: #111;
     }
+    .resume .metric {
+      background: none;
+      color: #111;
+    }
   }
 </style>
+
+<script>
+  import { toast } from '../scripts/toast';
+
+  document.addEventListener('astro:page-load', () => {
+    const link = document.querySelector<HTMLElement>('[data-download]');
+    const label = link?.querySelector<HTMLElement>('[data-download-label]');
+    if (!link || !label) return;
+    link.addEventListener('click', () => {
+      label.textContent = 'Downloaded ✓';
+      toast('Resume downloading');
+      setTimeout(() => (label.textContent = 'Download PDF'), 2500);
+    });
+  });
+</script>

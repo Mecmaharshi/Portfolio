@@ -67,6 +67,8 @@ const index = await getSiteIndex();
             sound = localStorage.getItem('sound') === 'on' ? 'on' : 'off';
           } catch {}
           doc.documentElement.dataset.sound = sound;
+          // Lets CSS hide scroll-reveal content only when the script that reveals it will run
+          doc.documentElement.classList.add('js');
         };
         apply(document);
         if (!window.__themeSwapListener) {

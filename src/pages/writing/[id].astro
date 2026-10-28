@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import ReadingProgress from '../../components/ReadingProgress.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatDate, getPosts } from '../../lib/content';
 
@@ -16,6 +17,7 @@ const minutes = Math.max(1, Math.round(words / 230));
 ---
 
 <BaseLayout title={title} description={description} og={`writing/${post.id}`} type="article" noindex={draft}>
+  <ReadingProgress />
   <article>
     <header class="mx-auto max-w-3xl px-4 pt-12 pb-8 sm:px-6 sm:pt-16">
       <a href="/writing" class="font-mono text-sm text-muted transition-colors hover:text-text">
@@ -63,7 +65,7 @@ const minutes = Math.max(1, Math.round(words / 230));
 
   <p class="mx-auto mt-16 max-w-3xl px-4 text-muted sm:px-6">
     Thoughts or questions?{' '}
-    <a class="font-medium text-accent-ink underline-offset-4 hover:underline" href="/contact">
+    <a class="font-medium text-accent-ink ulink" href="/contact">
       Get in touch →
     </a>
   </p>

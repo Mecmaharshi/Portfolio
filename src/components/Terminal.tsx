@@ -4,6 +4,7 @@ import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
 import { isSoundOn, play, setSound } from '../scripts/sound';
 import { getTheme, toggleTheme } from '../scripts/theme';
+import { toast } from '../scripts/toast';
 
 type Line = { kind: 'in' | 'out' | 'err'; text: ReactNode };
 
@@ -136,6 +137,7 @@ export default function Terminal({ index }: { index: SiteIndex }) {
         return [{ kind: 'out', text: 'opening resume PDF…' }];
       case 'email':
         navigator.clipboard?.writeText(site.email).catch(() => {});
+        toast('Email copied');
         return [{ kind: 'out', text: `${site.email} (copied)` }];
       case 'socials':
         return social.map((s) => ({

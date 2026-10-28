@@ -15,6 +15,8 @@ const work = defineCollection({
     period: z.string().optional(),
     order: z.number(),
     featured: z.boolean().default(false),
+    // Used by the filter chips on /work
+    topics: z.array(z.string()).default([]),
     stack: z.array(z.string()),
     metrics: z.array(z.object({ value: z.string(), label: z.string() })).default([]),
     draft: z.boolean().default(false),

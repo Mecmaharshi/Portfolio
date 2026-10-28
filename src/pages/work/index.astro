@@ -7,6 +7,18 @@ import { getWork } from '../../lib/content';
 const work = await getWork();
 const featured = work.filter((entry) => entry.data.featured);
 const rest = work.filter((entry) => !entry.data.featured);
+
+// Filter chips: every company, then the topics used by more than one case study
+const companies = [...new Set(work.map((entry) => entry.data.company))];
+const topicCounts = new Map<string, number>();
+work.flatMap((entry) => entry.data.topics).forEach((t) => topicCounts.set(t, (topicCounts.get(t) ?? 0) + 1));
+const topics = [...topicCounts].filter(([, n]) => n > 1).map(([t]) => t);
+const count = (f: string) => work.filter((e) => e.data.company === f || e.data.topics.includes(f)).length;
+const filters = [
+  { label: 'All', value: 'all', n: work.length },
+  ...companies.map((c) => ({ label: c.replace(' Technologies', ''), value: c, n: count(c) })),
+  ...topics.map((t) => ({ label: t, value: t, n: count(t) })),
+];
 ---
 
 <BaseLayout
@@ -19,22 +31,76 @@ const rest = work.filter((entry) => !entry.data.featured);
     see how the system handles failure.
   </PageHeader>
 
-  <section class="mx-auto max-w-6xl px-4 sm:px-6" aria-label="Featured case studies">
-    <div class="grid gap-5 lg:grid-cols-2">
+  <div class="mx-auto mb-8 max-w-6xl px-4 sm:px-6" data-reveal>
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Filter case studies" data-filters>
+      {filters.map((f, i) => (
+        <>
+          {i === companies.length + 1 && <span class="mx-1 my-1.5 w-px self-stretch bg-border" aria-hidden="true" />}
+          <button
+            type="button"
+            data-filter={f.value}
+            aria-pressed={f.value === 'all' ? 'true' : 'false'}
+            class="inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-1.5 text-sm text-muted transition-colors hover:border-muted/50 hover:text-text aria-pressed:border-text aria-pressed:bg-text aria-pressed:text-bg"
+          >
+            {f.label}
+            <span class="font-mono text-[0.7rem] opacity-60">{f.n}</span>
+          </button>
+        </>
+      ))}
+    </div>
+  </div>
+
+  <section class="mx-auto max-w-6xl px-4 sm:px-6" aria-label="Featured case studies" data-work-section>
+    <div class="grid gap-5 lg:grid-cols-2" data-reveal-group>
       {featured.map((entry) => (
-        <WorkCard entry={entry} large />
+        <div data-card data-company={entry.data.company} data-topics={entry.data.topics.join('|')}>
+          <WorkCard entry={entry} large />
+        </div>
       ))}
     </div>
   </section>
 
-  <section class="mx-auto mt-16 max-w-6xl px-4 sm:px-6" aria-labelledby="more-work">
-    <h2 id="more-work" class="font-mono text-sm text-muted">
+  <section class="mx-auto mt-16 max-w-6xl px-4 sm:px-6" aria-labelledby="more-work" data-work-section>
+    <h2 id="more-work" class="font-mono text-sm text-muted" data-reveal>
       // more work
     </h2>
-    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group>
       {rest.map((entry) => (
-        <WorkCard entry={entry} />
+        <div data-card data-company={entry.data.company} data-topics={entry.data.topics.join('|')}>
+          <WorkCard entry={entry} />
+        </div>
       ))}
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const chips = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    if (!chips.length) return;
+    const cards = document.querySelectorAll<HTMLElement>('[data-card]');
+    const sections = document.querySelectorAll<HTMLElement>('[data-work-section]');
+
+    const apply = (filter: string) => {
+      chips.forEach((chip) => chip.setAttribute('aria-pressed', String(chip.dataset.filter === filter)));
+      cards.forEach((card) => {
+        const match =
+          filter === 'all' || card.dataset.company === filter || card.dataset.topics!.split('|').includes(filter);
+        card.hidden = !match;
+      });
+      sections.forEach((section) => (section.hidden = !section.querySelector('[data-card]:not([hidden])')));
+    };
+
+    chips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter!;
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!document.startViewTransition || reduce) return apply(filter);
+        // Name each card for the transition so they glide to their new grid positions
+        cards.forEach((card, i) => (card.style.viewTransitionName = `work-card-${i}`));
+        const transition = document.startViewTransition(() => apply(filter));
+        transition.finished.finally(() => cards.forEach((card) => (card.style.viewTransitionName = '')));
+      }),
+    );
+  });
+</script>

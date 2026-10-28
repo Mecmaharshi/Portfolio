@@ -17,6 +17,7 @@ npm run preview      # serve dist/ (Astro allows one preview per project: `npx a
 npm run check        # astro check: type-check .astro/.ts/.tsx (the only automated check; no tests)
 npm run format       # prettier with the Astro plugin
 npm run resume:pdf   # after a build: prints /resume to public/maharshi-ishu-jasraj-resume.pdf via local Edge
+npm run check:html   # after a build: fails on whitespace bugs around inline elements (see below)
 ```
 
 Node >= 22.23.4 (Astro 7). Netlify builds with Node 24 via `netlify.toml`.
@@ -35,8 +36,15 @@ Node >= 22.23.4 (Astro 7). Netlify builds with Node 24 via `netlify.toml`.
 - **Contact:** `src/pages/contact/index.astro` is a Netlify Form (detected at deploy from the static HTML), submitted with `fetch`. It carries `data-astro-reload` so client-side routing doesn't intercept it, and falls back to `/contact/thanks` without JS. Submitting can't work under `astro preview`; the error message appearing locally is expected.
 - **Theming:** color tokens are CSS variables in `src/styles/global.css`, defined for light (`:root`), dark (`[data-theme="dark"]`), a no-JS `prefers-color-scheme` fallback (keep all three in sync) and print. They are exposed to Tailwind through `@theme inline` (`bg-bg`, `text-muted`, `text-accent-ink`, `text-danger`, etc.). `.prose-site` maps the typography plugin onto the tokens. Shiki emits both themes, and the dark one is applied under `[data-theme="dark"]`. Elements hidden when printing use `data-no-print`.
 - **Sound effects:** off by default. `src/scripts/sound.ts` synthesizes them with the Web Audio API (no audio files). Call `play('<name>')` anywhere; it does nothing unless the visitor turned sound on with the header toggle, the palette or the terminal's `sound` command. The preference is in localStorage and on `<html data-sound>` (set before paint like the theme), and the toggle's icons use the `sound-on:` variant.
+- **Motion system** (CSS in `global.css`, behavior in `scripts/ui.ts`), opted into with attributes and classes:
+  - `data-reveal` fades an element up when it scrolls into view; `data-reveal-group` does the same for each child, staggered. Content is only hidden under `html.js` (set by the BaseLayout head script), so no-JS visitors and print see everything. Don't put it on above-the-fold hero content, and don't put it on React island roots.
+  - `.spotlight` adds a pointer-following glow (the element must not need another `position`); `.ulink` draws the underline in on hover; `.arrow` / `.arrow-ne` / `.arrow-down` spans nudge when their link is hovered; `.btn` makes an anchor press in like a button (real `<button>`s do this already).
+  - `toast('…')` from `scripts/toast.ts` shows the small confirmation pill (copying, downloads).
+  - `<ReadingProgress />` adds the top progress bar for the page's `<article>`. The header hides on scroll down via `[data-site-header]`, and the active nav underline slides between pages through `transition:name="nav-indicator"`.
+  - Prose pages automatically get `#` heading anchors and copy buttons on code blocks.
+  - Tailwind v4 `translate-*`/`scale-*` utilities use the separate `translate`/`scale` CSS properties, so they combine with these `transform` animations instead of overriding them.
 - **Motion rules:** every animation must respect `prefers-reduced-motion`. A global rule shortens CSS animations; JS animations check `matchMedia` themselves (count-up, SystemDiagram, the hero graph pauses its SMIL). Server-rendered output must already be the final state, so no-JS visitors see correct content.
-- **Whitespace gotcha:** Astro can drop the space between a word and an inline element on the next line (`calls me` + newline + `<span>` rendered as "meDhawal"). Use `{' '}` at the line end, then check the built HTML.
+- **Whitespace gotcha:** a line break between an inline element and the text around it changes what renders. `calls me` + newline + `<span>` can render as "meDhawal", and `</a>` + newline + `.` renders as "case study .". Prettier's Astro plugin reflows markup into exactly these shapes (it ignores `htmlWhitespaceSensitivity`), so after formatting, run `npm run build && npm run check:html`. Fix with `{' '}`, or by rewording so a sentence doesn't end in punctuation right after a link.
 
 ## Content rules
 

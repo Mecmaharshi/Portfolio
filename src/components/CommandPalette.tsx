@@ -6,6 +6,7 @@ import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
 import { isSoundOn, play, toggleSound } from '../scripts/sound';
 import { toggleTheme } from '../scripts/theme';
+import { toast } from '../scripts/toast';
 
 // Opened with ⌘K / Ctrl+K, or by any element with [data-palette-open] (see scripts/ui.ts,
 // which dispatches the 'palette:open' window event).
@@ -48,6 +49,7 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
     try {
       await navigator.clipboard.writeText(site.email);
       setCopied(true);
+      toast('Email copied');
       setTimeout(() => {
         setCopied(false);
         setOpen(false);

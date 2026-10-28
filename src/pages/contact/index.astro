@@ -5,7 +5,7 @@ import { site, social } from '../../data/site';
 
 const topics = ['Job opportunity', 'Freelance project', 'Just saying hi'];
 const field =
-  'mt-1.5 w-full rounded-lg border border-border bg-bg px-3.5 py-2.5 text-base transition-colors placeholder:text-muted/70 focus:border-accent focus:outline-none';
+  'mt-1.5 w-full rounded-lg border border-border bg-bg px-3.5 py-2.5 text-base transition-[border-color,box-shadow] duration-200 placeholder:text-muted/70 focus:border-accent focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_15%,transparent)] focus:outline-none';
 ---
 
 <BaseLayout
@@ -14,16 +14,16 @@ const field =
   description={`Get in touch with ${site.name} about backend and AI engineering roles or freelance projects.`}
 >
   <PageHeader eyebrow="// contact" title="Let's build something that doesn't fall over.">
-    Hiring for a backend or AI engineering role, or have a project in mind? Send a message, or email
-    <a class="text-accent-ink underline-offset-4 hover:underline" href={`mailto:${site.email}`}>
+    Hiring for a backend or AI engineering role, or have a project in mind? Send a message below, or email me at{' '}
+    <a class="ulink text-accent-ink" href={`mailto:${site.email}`}>
       {site.email}
     </a>
-    .
   </PageHeader>
 
-  <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_320px]">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_320px]" data-reveal-group>
     <div class="relative rounded-2xl border border-border bg-surface p-6 sm:p-8">
-      <!-- Netlify detects this form at deploy time; data-astro-reload stops client-side routing from intercepting it -->
+      <!-- Netlify detects this form at deploy time; data-astro-reload stops client-side routing from intercepting it.
+           novalidate: the script validates instead, so invalid fields can shake rather than just show a bubble -->
       <form
         name="contact"
         method="POST"
@@ -32,6 +32,7 @@ const field =
         netlify-honeypot="bot-field"
         data-astro-reload
         data-contact-form
+        novalidate
         class="grid gap-5"
       >
         <input type="hidden" name="form-name" value="contact" />
@@ -43,11 +44,17 @@ const field =
 
         <fieldset>
           <legend class="text-sm font-medium">What's this about?</legend>
-          <div class="mt-2 flex flex-wrap gap-2">
+          <!-- The dark pill slides behind whichever topic is selected (see script) -->
+          <div class="group relative mt-2 flex flex-wrap gap-2" data-topics>
+            <span
+              class="absolute rounded-full bg-text opacity-0 transition-all duration-300 ease-out"
+              data-topic-pill
+              aria-hidden="true"
+            ></span>
             {topics.map((topic, i) => (
-              <label class="cursor-pointer">
+              <label class="relative cursor-pointer">
                 <input type="radio" name="topic" value={topic} checked={i === 0} class="peer sr-only" />
-                <span class="inline-flex rounded-full border border-border px-3.5 py-1.5 text-sm text-muted transition-colors peer-checked:border-text peer-checked:bg-text peer-checked:text-bg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent hover:text-text">
+                <span class="inline-flex rounded-full border border-border px-3.5 py-1.5 text-sm text-muted transition-colors duration-300 peer-checked:border-text peer-checked:bg-text peer-checked:text-bg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent group-data-ready:peer-checked:bg-transparent hover:text-text">
                   {topic}
                 </span>
               </label>
@@ -86,9 +93,13 @@ const field =
         <div class="flex flex-wrap items-center gap-4">
           <button
             type="submit"
-            class="inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60"
+            data-send
+            class="send relative inline-flex h-11 items-center gap-2 overflow-hidden rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-80"
           >
-            Send message <span aria-hidden="true">→</span>
+            <span data-send-label>Send message</span>
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
           </button>
           <p class="text-sm text-danger" data-form-error hidden>
             That didn't go through. Please email me at{' '}
@@ -122,7 +133,7 @@ const field =
     <aside class="space-y-6 text-sm">
       <div>
         <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Email</h2>
-        <a class="mt-1 block text-base font-medium hover:text-accent-ink" href={`mailto:${site.email}`}>
+        <a class="ulink mt-1 inline-block text-base font-medium" href={`mailto:${site.email}`}>
           {site.email}
         </a>
       </div>
@@ -135,8 +146,11 @@ const field =
         <ul class="mt-1 space-y-1 text-base">
           {social.map((link) => (
             <li>
-              <a class="hover:text-accent-ink" href={link.href} target="_blank" rel="noopener">
-                {link.label} <span aria-hidden="true">↗</span>
+              <a class="transition-colors hover:text-accent-ink" href={link.href} target="_blank" rel="noopener">
+                {link.label}{' '}
+                <span class="arrow-ne" aria-hidden="true">
+                  ↗
+                </span>
               </a>
             </li>
           ))}
@@ -154,12 +168,49 @@ const field =
     if (!form) return;
     const error = document.querySelector<HTMLElement>('[data-form-error]')!;
     const success = document.querySelector<HTMLElement>('[data-form-success]')!;
-    const button = form.querySelector('button')!;
+    const button = form.querySelector<HTMLButtonElement>('[data-send]')!;
+    const label = form.querySelector<HTMLElement>('[data-send-label]')!;
+
+    // Sliding pill behind the selected topic
+    const topics = form.querySelector<HTMLElement>('[data-topics]')!;
+    const pill = form.querySelector<HTMLElement>('[data-topic-pill]')!;
+    const movePill = () => {
+      const chip = topics.querySelector<HTMLElement>('input:checked + span');
+      if (!chip) return;
+      Object.assign(pill.style, {
+        left: `${chip.offsetLeft}px`,
+        top: `${chip.offsetTop}px`,
+        width: `${chip.offsetWidth}px`,
+        height: `${chip.offsetHeight}px`,
+        opacity: '1',
+      });
+      topics.dataset.ready = '';
+    };
+    movePill();
+    topics.addEventListener('change', movePill);
+    addEventListener('resize', movePill);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       error.hidden = true;
+
+      const invalid = [...form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')].filter(
+        (el) => !el.checkValidity(),
+      );
+      if (invalid.length) {
+        invalid.forEach((el) => {
+          el.classList.remove('shake');
+          void el.offsetWidth;
+          el.classList.add('shake');
+        });
+        invalid[0].reportValidity();
+        play('error');
+        return;
+      }
+
       button.disabled = true;
+      button.classList.add('sending');
+      label.textContent = 'Sending…';
       try {
         const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
         const res = await fetch('/', {
@@ -174,12 +225,35 @@ const field =
       } catch {
         error.hidden = false;
         button.disabled = false;
+        play('error');
+      } finally {
+        button.classList.remove('sending');
+        label.textContent = 'Send message';
       }
     });
   });
 </script>
 
 <style>
+  /* While sending, a packet travels across the button */
+  .send.sending::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+    animation: packet 900ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  @keyframes packet {
+    to {
+      left: calc(100% + 12px);
+    }
+  }
   .sent-line {
     opacity: 0;
     animation: appear 250ms ease-out forwards;
