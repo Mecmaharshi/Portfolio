@@ -1,0 +1,40 @@
+---
+import PageHeader from '../../components/PageHeader.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWork } from '../../lib/content';
+
+const work = await getWork();
+const featured = work.filter((entry) => entry.data.featured);
+const rest = work.filter((entry) => !entry.data.featured);
+---
+
+<BaseLayout
+  title="Work"
+  og="work"
+  description="Case studies of production AI systems: multi-tenant GenAI pipelines, agentic RAG, document AI and high-scale APIs."
+>
+  <PageHeader eyebrow="// work" title="Systems I've designed and shipped.">
+    Every case study has an interactive architecture diagram. Press play to watch a request go through, or "break it" to
+    see how the system handles failure.
+  </PageHeader>
+
+  <section class="mx-auto max-w-6xl px-4 sm:px-6" aria-label="Featured case studies">
+    <div class="grid gap-5 lg:grid-cols-2">
+      {featured.map((entry) => (
+        <WorkCard entry={entry} large />
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto mt-16 max-w-6xl px-4 sm:px-6" aria-labelledby="more-work">
+    <h2 id="more-work" class="font-mono text-sm text-muted">
+      // more work
+    </h2>
+    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {rest.map((entry) => (
+        <WorkCard entry={entry} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

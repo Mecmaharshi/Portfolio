@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Where the contact form lands when it is submitted without JavaScript
+---
+
+<BaseLayout title="Message sent" noindex>
+  <section class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
+    <p class="font-mono text-sm text-ok">200 · message delivered</p>
+    <h1 class="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-6xl">Thanks, message received.</h1>
+    <p class="mt-5 max-w-xl text-lg text-muted">I read everything that comes through and will reply by email.</p>
+    <a
+      href="/"
+      class="mt-10 inline-flex h-11 items-center rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
+    >
+      Back to home
+    </a>
+  </section>
+</BaseLayout>

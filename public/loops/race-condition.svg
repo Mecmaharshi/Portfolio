@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" role="img" aria-label="Race condition: two writers read 100, both write, and one update is lost">
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .box { fill: #1d2028; stroke: #2c303a; stroke-width: 1.5; }
+    .lbl { fill: #ecebe6; font-size: 13px; }
+    .dim { fill: #9b978d; font-size: 11px; }
+    .val { font-size: 22px; font-weight: 700; text-anchor: middle; opacity: 0; }
+    .v100 { fill: #ecebe6; animation: v100 7s infinite; }
+    .v150 { fill: #ff7448; animation: v150 7s infinite; }
+    .v70 { fill: #ff6169; animation: v70 7s infinite; }
+    .rd, .wr { opacity: 0; }
+    .rdA { fill: #a196ff; animation: rdA 7s infinite; } .rdB { fill: #a196ff; animation: rdB 7s infinite; }
+    .wrA { fill: #ff7448; animation: wrA 7s infinite; } .wrB { fill: #ff7448; animation: wrB 7s infinite; }
+    .calc { opacity: 0; animation: calc 7s infinite; }
+    .note { opacity: 0; fill: #ff6169; font-size: 12px; animation: note 7s infinite; }
+    @keyframes v100 { 0%, 45% { opacity: 1; } 46%, 96% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes v150 { 0%, 45% { opacity: 0; } 46%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes v70 { 0%, 49% { opacity: 0; } 50%, 94% { opacity: 1; } 96%, 100% { opacity: 0; } }
+    @keyframes rdA { 0% { transform: translate(0, 0); opacity: 0; } 2% { opacity: 1; } 14% { transform: translate(-115px, 56px); opacity: 1; } 16%, 100% { transform: translate(-115px, 56px); opacity: 0; } }
+    @keyframes rdB { 0% { transform: translate(0, 0); opacity: 0; } 2% { opacity: 1; } 14% { transform: translate(115px, 56px); opacity: 1; } 16%, 100% { transform: translate(115px, 56px); opacity: 0; } }
+    @keyframes wrA { 0%, 35% { transform: translate(0, 0); opacity: 0; } 36% { opacity: 1; } 46% { transform: translate(115px, -56px); opacity: 1; } 48%, 100% { opacity: 0; } }
+    @keyframes wrB { 0%, 37% { transform: translate(0, 0); opacity: 0; } 38% { opacity: 1; } 50% { transform: translate(-115px, -56px); opacity: 1; } 52%, 100% { opacity: 0; } }
+    @keyframes calc { 0%, 15% { opacity: 0; } 17%, 90% { opacity: 1; } 96%, 100% { opacity: 0; } }
+    @keyframes note { 0%, 56% { opacity: 0; } 60%, 92% { opacity: 1; } 96%, 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .v70, .calc, .note { opacity: 1; } }
+  </style>
+  <rect width="400" height="225" rx="16" fill="#15171d"/>
+  <text x="20" y="30" class="dim">// race condition</text>
+  <rect x="140" y="40" width="120" height="58" rx="8" class="box"/>
+  <text x="200" y="58" text-anchor="middle" class="dim">balance</text>
+  <text class="val v100" x="200" y="86">100</text>
+  <text class="val v150" x="200" y="86">150</text>
+  <text class="val v70" x="200" y="86">70</text>
+  <rect x="30" y="140" width="110" height="44" rx="8" class="box"/><text x="85" y="167" text-anchor="middle" class="lbl">A: +50</text>
+  <rect x="260" y="140" width="110" height="44" rx="8" class="box"/><text x="315" y="167" text-anchor="middle" class="lbl">B: −30</text>
+  <circle class="rd rdA" cx="200" cy="98" r="5"/><circle class="rd rdB" cx="200" cy="98" r="5"/>
+  <circle class="wr wrA" cx="85" cy="140" r="6"/><circle class="wr wrB" cx="315" cy="140" r="6"/>
+  <text class="calc dim" x="85" y="202" text-anchor="middle">read 100 → 150</text>
+  <text class="calc dim" x="315" y="202" text-anchor="middle">read 100 → 70</text>
+  <text class="note" x="200" y="124" text-anchor="middle">expected 120. got 70.</text>
+</svg>

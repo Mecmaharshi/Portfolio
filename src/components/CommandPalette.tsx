@@ -2,12 +2,13 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { navigate } from 'astro:transitions/client';
 import { Command } from 'cmdk';
 import { useEffect, useState } from 'react';
-import { liveNav, site, social } from '../data/site';
+import { resumePdf, site, social } from '../data/site';
+import type { SiteIndex } from '../lib/nav';
 import { toggleTheme } from '../scripts/theme';
 
 // Opened with ⌘K / Ctrl+K, or by any element with [data-palette-open] (see scripts/ui.ts,
 // which dispatches the 'palette:open' window event).
-export default function CommandPalette() {
+export default function CommandPalette({ index }: { index: SiteIndex }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -48,15 +49,27 @@ export default function CommandPalette() {
   return (
     <Command.Dialog open={open} onOpenChange={setOpen} label="Command menu" loop>
       <Dialog.Title className="sr-only">Command menu</Dialog.Title>
-      <Dialog.Description className="sr-only">Search pages and actions</Dialog.Description>
-      <Command.Input placeholder="Where to? Type a page or an action…" />
+      <Dialog.Description className="sr-only">Search pages, case studies and actions</Dialog.Description>
+      <Command.Input placeholder="Where to? Type a page, a project or an action…" />
       <Command.List>
-        <Command.Empty>Nothing matches. Try “email” or “theme”.</Command.Empty>
+        <Command.Empty>Nothing matches. Try “rag”, “email” or “theme”.</Command.Empty>
         <Command.Group heading="Pages">
-          {liveNav.map((item) => (
+          {index.pages.map((item) => (
             <Item key={item.href} label={item.label} hint={item.href} onSelect={() => run(() => navigate(item.href))} />
           ))}
         </Command.Group>
+        <Command.Group heading="Case studies">
+          {index.work.map((item) => (
+            <Item key={item.href} label={item.label} onSelect={() => run(() => navigate(item.href))} />
+          ))}
+        </Command.Group>
+        {index.posts.length > 0 && (
+          <Command.Group heading="Writing">
+            {index.posts.map((item) => (
+              <Item key={item.href} label={item.label} onSelect={() => run(() => navigate(item.href))} />
+            ))}
+          </Command.Group>
+        )}
         <Command.Group heading="Actions">
           <Item
             label={copied ? 'Copied to clipboard ✓' : 'Copy email address'}
@@ -65,14 +78,20 @@ export default function CommandPalette() {
             onSelect={copyEmail}
           />
           <Item
-            label="Send an email"
-            keywords={['contact', 'mail', 'hire']}
-            onSelect={() => run(() => (location.href = `mailto:${site.email}`))}
+            label="Download resume (PDF)"
+            keywords={['cv', 'resume', 'pdf']}
+            onSelect={() => run(() => window.open(resumePdf, '_blank'))}
           />
           <Item
             label="Toggle light / dark theme"
             keywords={['dark', 'light', 'mode', 'theme']}
             onSelect={() => run(() => toggleTheme())}
+          />
+          <Item
+            label="Open the terminal"
+            hint="`"
+            keywords={['shell', 'console', 'cli', 'secret']}
+            onSelect={() => run(() => window.dispatchEvent(new Event('terminal:open')))}
           />
         </Command.Group>
         <Command.Group heading="Elsewhere">

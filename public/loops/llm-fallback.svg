@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" role="img" aria-label="LLM fallback chain: tier one and tier two fail, tier three answers, and the user gets a 200">
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .box { fill: #1d2028; stroke: #2c303a; stroke-width: 1.5; }
+    .lbl { fill: #ecebe6; font-size: 13px; }
+    .dim { fill: #9b978d; font-size: 11px; }
+    .pkt { animation: path 6s infinite; }
+    .t1 { animation: red1 6s infinite; } .t2 { animation: red2 6s infinite; } .t3 { animation: green3 6s infinite; }
+    .x1, .x2, .ok, .done { opacity: 0; font-size: 11px; font-weight: 700; }
+    .x1 { fill: #ff6169; animation: show1 6s infinite; } .x2 { fill: #ff6169; animation: show2 6s infinite; }
+    .ok { fill: #3ccf8e; animation: show3 6s infinite; } .done { fill: #3ccf8e; animation: show4 6s infinite; }
+    .plain { font-weight: 400; }
+    @keyframes path {
+      0% { transform: translate(0, 0); fill: #ff7448; opacity: 1; }
+      12%, 18% { transform: translate(190px, 0); fill: #ff7448; }
+      28%, 34% { transform: translate(190px, 56px); fill: #ff7448; }
+      44% { transform: translate(190px, 112px); fill: #ff7448; }
+      46%, 50% { transform: translate(190px, 112px); fill: #3ccf8e; }
+      64% { transform: translate(0, 0); fill: #3ccf8e; opacity: 1; }
+      70%, 100% { transform: translate(0, 0); fill: #3ccf8e; opacity: 0; }
+    }
+    @keyframes red1 { 0%, 12% { stroke: #2c303a; } 13%, 30% { stroke: #ff6169; } 40%, 100% { stroke: #2c303a; } }
+    @keyframes red2 { 0%, 28% { stroke: #2c303a; } 29%, 46% { stroke: #ff6169; } 56%, 100% { stroke: #2c303a; } }
+    @keyframes green3 { 0%, 44% { stroke: #2c303a; } 46%, 80% { stroke: #3ccf8e; } 90%, 100% { stroke: #2c303a; } }
+    @keyframes show1 { 0%, 12% { opacity: 0; } 13%, 30% { opacity: 1; } 34%, 100% { opacity: 0; } }
+    @keyframes show2 { 0%, 28% { opacity: 0; } 29%, 46% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes show3 { 0%, 45% { opacity: 0; } 46%, 80% { opacity: 1; } 86%, 100% { opacity: 0; } }
+    @keyframes show4 { 0%, 63% { opacity: 0; } 64%, 92% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .x1, .x2, .ok, .done { opacity: 1; } }
+  </style>
+  <rect width="400" height="225" rx="16" fill="#15171d"/>
+  <text x="20" y="30" class="dim">// llm fallback chain</text>
+  <rect x="20" y="60" width="80" height="40" rx="8" class="box"/><text x="60" y="85" text-anchor="middle" class="lbl">user</text>
+  <rect x="250" y="60" width="110" height="40" rx="8" class="box t1"/><text x="305" y="85" text-anchor="middle" class="lbl">tier 1</text>
+  <rect x="250" y="116" width="110" height="40" rx="8" class="box t2"/><text x="305" y="141" text-anchor="middle" class="lbl">tier 2</text>
+  <rect x="250" y="172" width="110" height="40" rx="8" class="box t3"/><text x="305" y="197" text-anchor="middle" class="lbl">tier 3</text>
+  <path d="M100 80 H250 M240 80 V192" stroke="#2c303a" stroke-dasharray="4 5" fill="none"/>
+  <circle class="pkt" cx="60" cy="80" r="6"/>
+  <text class="x1" x="370" y="85">✗</text><text class="x1" x="305" y="54" text-anchor="middle">429</text>
+  <text class="x2" x="370" y="141">✗</text><text class="x2" x="305" y="112" text-anchor="middle">timeout</text>
+  <text class="ok" x="370" y="197">✓</text>
+  <text class="done" x="60" y="124" text-anchor="middle">200 OK</text>
+  <text class="done plain" x="60" y="140" text-anchor="middle">user never knew</text>
+</svg>

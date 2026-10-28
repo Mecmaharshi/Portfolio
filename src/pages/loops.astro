@@ -1,0 +1,81 @@
+---
+import PageHeader from '../components/PageHeader.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loops } from '../data/loops';
+import { site } from '../data/site';
+---
+
+<BaseLayout
+  title="Loops"
+  og="loops"
+  description="Small looping animations of backend and AI ideas, free to drop into pull requests, issues and docs."
+>
+  <PageHeader eyebrow="// loops" title="Backend ideas, on a loop.">
+    Small animations of the things that go wrong in distributed systems. They're plain animated SVGs, so they play
+    anywhere an image does: drop one into a pull request, an issue or a README.
+  </PageHeader>
+
+  <section class="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
+    {loops.map((loop) => {
+      const url = new URL(`/loops/${loop.id}.svg`, site.url).href;
+      return (
+        <figure id={loop.id} class="group scroll-mt-24 rounded-2xl border border-border bg-surface p-3">
+          <img
+            src={`/loops/${loop.id}.svg`}
+            alt={`${loop.title}: ${loop.caption}`}
+            width="400"
+            height="225"
+            loading="lazy"
+            class="w-full rounded-xl"
+          />
+          <figcaption class="px-2 pt-4 pb-2">
+            <h2 class="font-display text-lg font-semibold">{loop.title}</h2>
+            <p class="mt-1 text-sm leading-relaxed text-muted">{loop.caption}</p>
+            <p class="mt-1 font-mono text-xs text-muted/80">use it {loop.use}</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                data-copy={`![${loop.title}](${url})`}
+                class="rounded-md border border-border px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/60 hover:text-text"
+              >
+                copy markdown
+              </button>
+              <button
+                type="button"
+                data-copy={url}
+                class="rounded-md border border-border px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/60 hover:text-text"
+              >
+                copy url
+              </button>
+            </div>
+          </figcaption>
+        </figure>
+      );
+    })}
+  </section>
+
+  <p class="mx-auto mt-12 max-w-6xl px-4 text-sm text-muted sm:px-6">
+    Got a failure mode that deserves a loop?{' '}
+    <a class="text-accent-ink underline-offset-4 hover:underline" href="/contact">
+      Suggest one
+    </a>
+    .
+  </p>
+</BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const label = button.textContent;
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy!);
+          button.textContent = 'copied ✓';
+        } catch {
+          button.textContent = 'copy failed';
+        }
+        setTimeout(() => (button.textContent = label), 1400);
+      });
+    });
+  });
+</script>

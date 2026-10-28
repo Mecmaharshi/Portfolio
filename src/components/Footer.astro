@@ -4,11 +4,16 @@ import { site, social } from '../data/site';
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-24 border-t border-border">
+<footer data-no-print class="mt-24 border-t border-border">
   <div class="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-    <p>
-      © {year} {site.name}. Built with Astro, deployed on Netlify.
-    </p>
+    <div class="space-y-1">
+      <p>
+        © {year} {site.name}. Built with Astro, deployed on Netlify.
+      </p>
+      <p class="hidden font-mono text-xs [@media(pointer:fine)]:block">
+        psst: press <span class="kbd">`</span> for a terminal
+      </p>
+    </div>
     <ul class="flex flex-wrap gap-x-5 gap-y-2">
       <li>
         <a class="transition-colors hover:text-text" href={`mailto:${site.email}`}>

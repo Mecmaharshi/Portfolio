@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" role="img" aria-label="Thundering herd: a cache entry expires and every client hits the database at once">
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .box { fill: #1d2028; stroke: #2c303a; stroke-width: 1.5; }
+    .lbl { fill: #ecebe6; font-size: 13px; }
+    .dim { fill: #9b978d; font-size: 11px; }
+    .herd circle { fill: #ff7448; opacity: .45; animation: rush 6s infinite; }
+    .herd circle:nth-child(2n) { animation-delay: .05s; } .herd circle:nth-child(3n) { animation-delay: .1s; }
+    .ttl { transform-box: fill-box; transform-origin: left; animation: ttl 6s infinite; }
+    .hit { fill: #3ccf8e; font-size: 11px; animation: hit 6s infinite; }
+    .miss { fill: #ff6169; font-size: 11px; opacity: 0; animation: miss 6s infinite; }
+    .db { animation: shake 6s infinite; }
+    .db rect { animation: hot 6s infinite; }
+    .cpu { fill: #ff6169; font-size: 11px; opacity: 0; animation: miss 6s infinite; }
+    @keyframes rush {
+      0%, 36% { transform: translateX(0); opacity: .45; }
+      37% { opacity: 1; }
+      50% { transform: translateX(250px); opacity: 1; }
+      52%, 90% { transform: translateX(250px); opacity: 0; }
+      91% { transform: translateX(0); opacity: 0; }
+      100% { opacity: .45; }
+    }
+    @keyframes ttl { 0% { transform: scaleX(1); fill: #3ccf8e; } 30% { fill: #ff7448; } 35%, 90% { transform: scaleX(0); fill: #ff6169; } 100% { transform: scaleX(1); fill: #3ccf8e; } }
+    @keyframes hit { 0%, 34% { opacity: 1; } 35%, 92% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes miss { 0%, 35% { opacity: 0; } 37%, 88% { opacity: 1; } 92%, 100% { opacity: 0; } }
+    @keyframes shake {
+      0%, 50%, 66%, 100% { transform: translateX(0); }
+      52%, 56%, 60%, 64% { transform: translateX(-3px); }
+      54%, 58%, 62% { transform: translateX(3px); }
+    }
+    @keyframes hot { 0%, 49% { fill: #1d2028; stroke: #2c303a; } 52%, 85% { fill: #3a1d22; stroke: #ff6169; } 95%, 100% { fill: #1d2028; stroke: #2c303a; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .miss, .cpu { opacity: 1; } .hit { opacity: 0; } }
+  </style>
+  <rect width="400" height="225" rx="16" fill="#15171d"/>
+  <text x="20" y="30" class="dim">// thundering herd</text>
+  <g class="herd">
+    <circle cx="45" cy="64" r="5"/><circle cx="45" cy="82" r="5"/><circle cx="45" cy="100" r="5"/><circle cx="45" cy="118" r="5"/>
+    <circle cx="45" cy="136" r="5"/><circle cx="45" cy="154" r="5"/><circle cx="45" cy="172" r="5"/><circle cx="45" cy="190" r="5"/>
+  </g>
+  <rect x="140" y="48" width="110" height="40" rx="8" class="box"/>
+  <text x="195" y="73" text-anchor="middle" class="lbl">cache</text>
+  <rect x="140" y="96" width="110" height="5" rx="2.5" fill="#2c303a"/>
+  <rect class="ttl" x="140" y="96" width="110" height="5" rx="2.5"/>
+  <text class="hit" x="195" y="120" text-anchor="middle">ttl ok · hit</text>
+  <text class="miss" x="195" y="120" text-anchor="middle">expired · miss ×8</text>
+  <g class="db"><rect x="300" y="56" width="80" height="140" rx="8" class="box"/><text x="340" y="131" text-anchor="middle" class="lbl">db</text></g>
+  <text class="cpu" x="340" y="214" text-anchor="middle">cpu 100%</text>
+</svg>

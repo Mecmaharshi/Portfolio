@@ -16,16 +16,16 @@ export const social = [
   { label: 'LeetCode', href: 'https://leetcode.com/Mecmaharshi' },
 ];
 
-// Pages appear in the header and command palette only once `ready` is true,
-// so the live site never links to a page that doesn't exist yet.
-export const nav = [
-  { label: 'Home', href: '/', ready: true },
-  { label: 'Work', href: '/work', ready: false },
-  { label: 'Writing', href: '/writing', ready: false },
-  { label: 'About', href: '/about', ready: false },
-  { label: 'Loops', href: '/loops', ready: false },
-  { label: 'Resume', href: '/resume', ready: false },
-  { label: 'Contact', href: '/contact', ready: false },
-];
+export const resumePdf = '/maharshi-ishu-jasraj-resume.pdf';
 
-export const liveNav = nav.filter((item) => item.ready);
+// Header and command palette pages. Writing only appears once a post is published
+// (see lib/nav.ts), so the site never links to an empty section.
+export const nav = [
+  { label: 'Home', href: '/' },
+  { label: 'Work', href: '/work' },
+  { label: 'Writing', href: '/writing', requiresPosts: true },
+  { label: 'About', href: '/about' },
+  { label: 'Loops', href: '/loops' },
+  { label: 'Resume', href: '/resume' },
+  { label: 'Contact', href: '/contact' },
+];
