@@ -2,6 +2,7 @@ import { navigate } from 'astro:transitions/client';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
+import { releaseChaos } from '../scripts/chaos';
 import { isSoundOn, play, setSound } from '../scripts/sound';
 import { getTheme, toggleTheme } from '../scripts/theme';
 import { toast } from '../scripts/toast';
@@ -19,6 +20,7 @@ const COMMANDS = [
   'email',
   'theme',
   'sound',
+  'chaos',
   'socials',
   'clear',
   'exit',
@@ -92,6 +94,7 @@ export default function Terminal({ index }: { index: SiteIndex }) {
           'socials           where else to find me',
           'theme [light|dark] switch theme',
           'sound [on|off]    sound effects',
+          'chaos             release the chaos monkey',
           'clear / exit',
         ].map((text) => ({ kind: 'out', text }));
       case 'whoami':
@@ -162,6 +165,11 @@ export default function Terminal({ index }: { index: SiteIndex }) {
         setSound(on);
         return [{ kind: 'out', text: `sound: ${on ? 'on' : 'off'}` }];
       }
+      case 'chaos':
+        setOpen(false);
+        // Let the terminal close first so the page is what gets knocked around
+        setTimeout(releaseChaos, 150);
+        return [];
       case 'sudo':
         if (/hire/.test(arg)) {
           play('chime');

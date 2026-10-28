@@ -153,3 +153,15 @@ function syncSoundToggles() {
     .forEach((el) => el.setAttribute('aria-pressed', String(isSoundOn())));
 }
 window.addEventListener('sound:change', syncSoundToggles);
+
+// While the tab is in the background its title asks the visitor back
+let awayTitle: string | undefined;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    awayTitle = document.title;
+    document.title = '👋 connection idle… come back?';
+  } else if (awayTitle) {
+    document.title = awayTitle;
+    awayTitle = undefined;
+  }
+});

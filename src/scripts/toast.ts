@@ -1,7 +1,7 @@
-// A single small confirmation pill at the bottom of the screen ("Copied", "Link copied").
+// A single small confirmation pill at the bottom of the screen ("Copied", "Link copied"), or a warning.
 let timer: number | undefined;
 
-export function toast(message: string) {
+export function toast(message: string, kind: 'ok' | 'warn' = 'ok') {
   let el = document.getElementById('toast');
   if (!el) {
     // Recreated after client-side navigations, which replace <body>
@@ -12,6 +12,7 @@ export function toast(message: string) {
     document.body.append(el);
   }
   el.textContent = message;
+  el.dataset.kind = kind;
   el.classList.remove('toast-show');
   void el.offsetWidth; // restart the entrance when toasts fire back to back
   el.classList.add('toast-show');

@@ -4,6 +4,7 @@ import { Command } from 'cmdk';
 import { useEffect, useState } from 'react';
 import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
+import { releaseChaos } from '../scripts/chaos';
 import { isSoundOn, play, toggleSound } from '../scripts/sound';
 import { toggleTheme } from '../scripts/theme';
 import { toast } from '../scripts/toast';
@@ -110,6 +111,11 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
             hint="`"
             keywords={['shell', 'console', 'cli', 'secret']}
             onSelect={() => run(() => window.dispatchEvent(new Event('terminal:open')))}
+          />
+          <Item
+            label="Release the chaos monkey"
+            keywords={['chaos', 'break', 'fun', 'secret', 'easter egg']}
+            onSelect={() => run(() => setTimeout(releaseChaos, 200))}
           />
         </Command.Group>
         <Command.Group heading="Elsewhere">
