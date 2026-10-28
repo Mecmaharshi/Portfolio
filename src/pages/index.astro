@@ -1,0 +1,251 @@
+---
+import SystemGraph from '../components/SystemGraph.astro';
+import WorkCard from '../components/WorkCard.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loops } from '../data/loops';
+import { site } from '../data/site';
+import { formatDate, getPosts, getWork } from '../lib/content';
+
+// `to` drives the count-up animation; `value` is the final text everyone ends up seeing.
+const stats = [
+  { value: '1M+', to: 1_000_000, label: 'data requests a day through FastAPI services on Azure Functions' },
+  { value: '30k+', to: 30_000, label: 'financial documents processed monthly at 99.9% uptime' },
+  { value: '65+', to: 65, label: 'Durable Functions orchestrating 6 AI services in production' },
+  { value: '20%+', to: 20, label: 'fewer creative regenerations with LLM-as-judge scoring' },
+];
+
+const work = await getWork();
+const featured = work.filter((entry) => entry.data.featured);
+const posts = (await getPosts()).slice(0, 3);
+const loopPreview = loops.slice(0, 3);
+---
+
+<BaseLayout>
+  <section class="relative overflow-hidden">
+    <div
+      class="bg-dots pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_30%_20%,black,transparent_70%)]"
+      aria-hidden="true"
+    ></div>
+
+    <div class="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 md:pb-24 lg:grid-cols-[1.3fr_1fr] lg:pt-20">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-muted">
+          <span class="relative flex size-2">
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-60"></span>
+            <span class="relative inline-flex size-2 rounded-full bg-ok"></span>
+          </span>
+          Currently at {site.current.company}, {site.current.doing}
+        </p>
+
+        <h1 class="mt-7 font-display text-[2.6rem] leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl xl:text-7xl">
+          I build production AI systems that{' '}
+          <span class="relative inline-block whitespace-nowrap text-accent-ink">
+            don’t fall over
+            <svg
+              class="squiggle absolute -bottom-2 left-0 h-3 w-full text-accent"
+              viewBox="0 0 300 12"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 8 C 40 2, 70 12, 110 6 S 180 2, 220 7 S 280 10, 298 4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                pathLength="1"
+              ></path>
+            </svg>
+          </span>
+          .
+        </h1>
+
+        <p class="mt-7 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
+          I’m {site.shortName}, a backend engineer with 4+ years designing LLM pipelines, RAG and agentic systems, and
+          event-driven serverless backends on Azure. Currently at Dentsu; previously at Celebal Technologies.
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <a
+            href="/work"
+            class="inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            See the work <span aria-hidden="true">→</span>
+          </a>
+          <a
+            href="/contact"
+            class="inline-flex h-11 items-center gap-2 rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5 hover:border-muted/50"
+          >
+            Get in touch
+          </a>
+          <button
+            type="button"
+            data-palette-open
+            class="hidden h-11 items-center gap-2 px-2 text-sm text-muted transition-colors hover:text-text [@media(pointer:fine)]:inline-flex"
+          >
+            or press{' '}
+            <span class="kbd">
+              <span data-mod-key>Ctrl</span>&nbsp;K
+            </span>
+          </button>
+        </div>
+        <p class="mt-5 text-sm text-muted">
+          Open to senior backend and AI engineering roles, and to freelance projects.
+        </p>
+      </div>
+
+      <div class="hidden lg:block">
+        <SystemGraph work={work} />
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 sm:px-6" aria-labelledby="numbers">
+    <h2 id="numbers" class="font-mono text-sm text-muted">
+      // by the numbers
+    </h2>
+    <dl class="mt-5 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat) => (
+        <div class="flex flex-col gap-2 bg-surface p-6">
+          <dt class="order-2 text-sm leading-snug text-muted">{stat.label}</dt>
+          <dd class="order-1 font-display text-4xl font-semibold tracking-tight">
+            <span class="sr-only">{stat.value}</span>
+            <span aria-hidden="true" data-count-to={stat.to}>
+              {stat.value}
+            </span>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="selected-work">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <h2 id="selected-work" class="font-mono text-sm text-muted">
+          // selected work
+        </h2>
+        <p class="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Press play. Then break it.</p>
+        <p class="mt-2 max-w-xl text-muted">
+          Each case study comes with an interactive architecture diagram, including the failure modes.
+        </p>
+      </div>
+      <a href="/work" class="hidden shrink-0 text-sm font-medium text-accent-ink hover:underline sm:block">
+        All {work.length} case studies →
+      </a>
+    </div>
+    <div class="mt-8 grid gap-5 lg:grid-cols-2">
+      {featured.map((entry) => (
+        <WorkCard entry={entry} large />
+      ))}
+    </div>
+    <a href="/work" class="mt-6 block text-sm font-medium text-accent-ink sm:hidden">
+      All {work.length} case studies →
+    </a>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="latest-writing">
+      <div class="flex items-end justify-between gap-4">
+        <h2 id="latest-writing" class="font-mono text-sm text-muted">
+          // latest writing
+        </h2>
+        <a href="/writing" class="text-sm font-medium text-accent-ink hover:underline">
+          All writing →
+        </a>
+      </div>
+      <ul class="mt-5 divide-y divide-border border-y border-border">
+        {posts.map((post) => (
+          <li>
+            <a
+              href={`/writing/${post.id}`}
+              class="group flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:gap-6"
+            >
+              <time class="w-32 shrink-0 font-mono text-sm text-muted" datetime={post.data.published.toISOString()}>
+                {formatDate(post.data.published)}
+              </time>
+              <span class="font-display text-xl font-semibold transition-colors group-hover:text-accent-ink">
+                {post.data.title}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="loops-teaser">
+    <div class="rounded-3xl border border-border bg-surface p-6 sm:p-10">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 id="loops-teaser" class="font-mono text-sm text-muted">
+            // loops
+          </h2>
+          <p class="mt-2 font-display text-3xl font-semibold tracking-tight">Backend ideas, on a loop.</p>
+          <p class="mt-2 max-w-xl text-muted">
+            Little animations of distributed-systems failures. Free to drop into your pull requests.
+          </p>
+        </div>
+        <a href="/loops" class="text-sm font-medium text-accent-ink hover:underline">
+          See all loops →
+        </a>
+      </div>
+      <div class="mt-8 grid gap-4 sm:grid-cols-3">
+        {loopPreview.map((loop) => (
+          <a href={`/loops#${loop.id}`} class="group block">
+            <img
+              src={`/loops/${loop.id}.svg`}
+              alt={`${loop.title}: ${loop.caption}`}
+              width="400"
+              height="225"
+              loading="lazy"
+              class="w-full rounded-xl transition duration-300 group-hover:-translate-y-1"
+            />
+            <span class="mt-2 block text-sm font-medium">{loop.title}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-24 max-w-6xl px-4 text-center sm:px-6">
+    <p class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
+      Have a backend that needs to stay up while the AI does its thing?
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a
+        href="/contact"
+        class="inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
+      >
+        Start a conversation <span aria-hidden="true">→</span>
+      </a>
+      <a
+        href="/resume"
+        class="inline-flex h-11 items-center rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5"
+      >
+        Read the resume
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hidden until the draw starts: a zero-length dash would otherwise show its round cap as a dot */
+  .squiggle path {
+    stroke-dasharray: 1;
+    animation: draw 900ms 400ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+      opacity: 0;
+    }
+    1% {
+      opacity: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
+</style>

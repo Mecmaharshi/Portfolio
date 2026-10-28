@@ -1,0 +1,70 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getPosts } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { title, description, published, updated, tags, draft } = post.data;
+const { Content, headings } = await render(post);
+const words = (post.body ?? '').split(/\s+/).length;
+const minutes = Math.max(1, Math.round(words / 230));
+---
+
+<BaseLayout title={title} description={description} og={`writing/${post.id}`} type="article" noindex={draft}>
+  <article>
+    <header class="mx-auto max-w-3xl px-4 pt-12 pb-8 sm:px-6 sm:pt-16">
+      <a href="/writing" class="font-mono text-sm text-muted transition-colors hover:text-text">
+        ← all writing
+      </a>
+      {draft && (
+        <p class="mt-6 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 font-mono text-xs text-danger">
+          draft: only visible in development
+        </p>
+      )}
+      <h1 class="mt-8 font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h1>
+      <p class="mt-4 text-lg text-muted">{description}</p>
+      <p class="mt-6 flex flex-wrap gap-x-3 font-mono text-xs text-muted">
+        <time datetime={published.toISOString()}>{formatDate(published)}</time>
+        {updated && <span>· updated {formatDate(updated)}</span>}
+        <span>· {minutes} min read</span>
+        {tags.length > 0 && <span>· {tags.join(', ')}</span>}
+      </p>
+    </header>
+
+    {headings.length > 2 && (
+      <nav
+        aria-label="Contents"
+        class="mx-auto mb-6 max-w-3xl px-4 font-mono text-xs text-muted sm:px-6 xl:fixed xl:top-28 xl:right-[max(1.5rem,calc(50vw-40rem))] xl:mb-0 xl:w-52 xl:px-0"
+      >
+        <p class="tracking-wider uppercase">Contents</p>
+        <ul class="mt-2 space-y-1.5">
+          {headings
+            .filter((h) => h.depth === 2)
+            .map((h) => (
+              <li>
+                <a class="transition-colors hover:text-text" href={`#${h.slug}`}>
+                  {h.text}
+                </a>
+              </li>
+            ))}
+        </ul>
+      </nav>
+    )}
+
+    <div class="prose-site prose mx-auto max-w-3xl px-4 sm:prose-lg sm:px-6">
+      <Content />
+    </div>
+  </article>
+
+  <p class="mx-auto mt-16 max-w-3xl px-4 text-muted sm:px-6">
+    Thoughts or questions?{' '}
+    <a class="font-medium text-accent-ink underline-offset-4 hover:underline" href="/contact">
+      Get in touch →
+    </a>
+  </p>
+</BaseLayout>

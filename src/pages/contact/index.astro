@@ -1,0 +1,203 @@
+---
+import PageHeader from '../../components/PageHeader.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site, social } from '../../data/site';
+
+const topics = ['Job opportunity', 'Freelance project', 'Just saying hi'];
+const field =
+  'mt-1.5 w-full rounded-lg border border-border bg-bg px-3.5 py-2.5 text-base transition-colors placeholder:text-muted/70 focus:border-accent focus:outline-none';
+---
+
+<BaseLayout
+  title="Contact"
+  og="contact"
+  description={`Get in touch with ${site.name} about backend and AI engineering roles or freelance projects.`}
+>
+  <PageHeader eyebrow="// contact" title="Let's build something that doesn't fall over.">
+    Hiring for a backend or AI engineering role, or have a project in mind? Send a message, or email
+    <a class="text-accent-ink underline-offset-4 hover:underline" href={`mailto:${site.email}`}>
+      {site.email}
+    </a>
+    .
+  </PageHeader>
+
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_320px]">
+    <div class="relative rounded-2xl border border-border bg-surface p-6 sm:p-8">
+      <!-- Netlify detects this form at deploy time; data-astro-reload stops client-side routing from intercepting it -->
+      <form
+        name="contact"
+        method="POST"
+        action="/contact/thanks"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        data-astro-reload
+        data-contact-form
+        class="grid gap-5"
+      >
+        <input type="hidden" name="form-name" value="contact" />
+        <p class="hidden">
+          <label>
+            Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off" />
+          </label>
+        </p>
+
+        <fieldset>
+          <legend class="text-sm font-medium">What's this about?</legend>
+          <div class="mt-2 flex flex-wrap gap-2">
+            {topics.map((topic, i) => (
+              <label class="cursor-pointer">
+                <input type="radio" name="topic" value={topic} checked={i === 0} class="peer sr-only" />
+                <span class="inline-flex rounded-full border border-border px-3.5 py-1.5 text-sm text-muted transition-colors peer-checked:border-text peer-checked:bg-text peer-checked:text-bg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent hover:text-text">
+                  {topic}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class="block text-sm font-medium">
+            Name
+            <input class={field} type="text" name="name" required autocomplete="name" placeholder="Ada Lovelace" />
+          </label>
+          <label class="block text-sm font-medium">
+            Email
+            <input
+              class={field}
+              type="email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="ada@company.com"
+            />
+          </label>
+        </div>
+
+        <label class="block text-sm font-medium">
+          Message
+          <textarea
+            class={`${field} min-h-36 resize-y`}
+            name="message"
+            required
+            placeholder="What are you building, and where could I help?"
+          ></textarea>
+        </label>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <button
+            type="submit"
+            class="inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60"
+          >
+            Send message <span aria-hidden="true">→</span>
+          </button>
+          <p class="text-sm text-danger" data-form-error hidden>
+            That didn't go through. Please email me at{' '}
+            <a class="underline" href={`mailto:${site.email}`}>
+              {site.email}
+            </a>
+            .
+          </p>
+        </div>
+      </form>
+
+      <!-- Success state: a little request trace, then a thank-you -->
+      <div class="hidden" data-form-success aria-live="polite">
+        <div class="rounded-xl border border-border bg-bg p-5 font-mono text-sm">
+          <p class="sent-line">
+            <span class="text-signal">POST</span> /contact
+          </p>
+          <p class="sent-line text-muted">
+            ├─ validate&nbsp;&nbsp;<span class="text-ok">ok</span>
+          </p>
+          <p class="sent-line text-muted">
+            ├─ deliver&nbsp;&nbsp;&nbsp;<span class="text-ok">ok</span>
+          </p>
+          <p class="sent-line font-semibold text-ok">└─ 200 message delivered</p>
+        </div>
+        <h2 class="mt-6 font-display text-2xl font-semibold">Thanks, message received.</h2>
+        <p class="mt-2 text-muted">I read everything that comes through here and will reply by email.</p>
+      </div>
+    </div>
+
+    <aside class="space-y-6 text-sm">
+      <div>
+        <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Email</h2>
+        <a class="mt-1 block text-base font-medium hover:text-accent-ink" href={`mailto:${site.email}`}>
+          {site.email}
+        </a>
+      </div>
+      <div>
+        <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Based in</h2>
+        <p class="mt-1 text-base">{site.location}</p>
+      </div>
+      <div>
+        <h2 class="font-mono text-xs tracking-wider text-muted uppercase">Elsewhere</h2>
+        <ul class="mt-1 space-y-1 text-base">
+          {social.map((link) => (
+            <li>
+              <a class="hover:text-accent-ink" href={link.href} target="_blank" rel="noopener">
+                {link.label} <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+    if (!form) return;
+    const error = document.querySelector<HTMLElement>('[data-form-error]')!;
+    const success = document.querySelector<HTMLElement>('[data-form-success]')!;
+    const button = form.querySelector('button')!;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      error.hidden = true;
+      button.disabled = true;
+      try {
+        const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
+        const res = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString(),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.classList.add('hidden');
+        success.classList.remove('hidden');
+      } catch {
+        error.hidden = false;
+        button.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .sent-line {
+    opacity: 0;
+    animation: appear 250ms ease-out forwards;
+  }
+  .sent-line:nth-child(2) {
+    animation-delay: 250ms;
+  }
+  .sent-line:nth-child(3) {
+    animation-delay: 500ms;
+  }
+  .sent-line:nth-child(4) {
+    animation-delay: 800ms;
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

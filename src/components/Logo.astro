@@ -1,0 +1,23 @@
+---
+// Brand mark: a prompt chevron that doubles as a fan-in graph (two nodes feeding one).
+// Keep in sync with public/favicon.svg.
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg class={className} viewBox="0 0 32 32" aria-hidden="true">
+  <rect width="32" height="32" rx="8" fill="var(--accent)"></rect>
+  <path
+    d="M10 10 22 16 10 22"
+    fill="none"
+    stroke="#fff"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  ></path>
+  <circle cx="10" cy="10" r="3" fill="#fff"></circle>
+  <circle cx="10" cy="22" r="3" fill="#fff"></circle>
+  <circle cx="22" cy="16" r="3.4" fill="#fff"></circle>
+</svg>

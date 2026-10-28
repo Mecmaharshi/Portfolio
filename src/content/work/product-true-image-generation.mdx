@@ -1,0 +1,34 @@
+---
+title: Product-true image generation
+short: Product-true imagery
+summary: Taking product-preserving image generation from R&D to production. Claude Vision finds where the product can go, and Firefly composites the real product into the scene, for 100% product fidelity.
+company: Dentsu
+role: Led from R&D to production
+order: 3
+stack:
+  - Python
+  - AWS Bedrock (Claude Vision)
+  - Adobe Firefly
+  - LLM-as-judge
+metrics:
+  - value: 100%
+    label: product fidelity
+  - value: R&D → prod
+    label: flagship capability
+---
+
+import SystemDiagram from '../../components/SystemDiagram';
+
+## The problem
+
+Image models redraw everything they generate. That's fine for a background and a dealbreaker for the product. A brand cannot run an ad in which its own product's shape, logo or label has drifted, even slightly.
+
+## The approach
+
+Don't let the model draw the product at all. Claude Vision (on AWS Bedrock) looks at a generated scene and finds surfaces where the product can sit, then Adobe Firefly composites the **real product photo** into that spot. The scene is generated; the product is never regenerated.
+
+<SystemDiagram client:visible id="product-imagery" />
+
+## Results
+
+I took this from an R&D idea to a flagship production feature of the [GenAI creative platform](/work/genai-creative-platform), with **100% product fidelity**: the product in the ad is exactly the one in the photo.

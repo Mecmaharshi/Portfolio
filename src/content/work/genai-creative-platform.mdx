@@ -1,0 +1,78 @@
+---
+title: A multi-tenant GenAI creative platform
+short: GenAI creative platform
+summary: The backend of Dentsu's generative-AI creative platform. 65+ Azure Durable Functions orchestrate 6 AI services to produce 300+ ad creatives a month for 3 global brands.
+company: Dentsu
+role: Backend architect
+period: Nov 2025 – present
+order: 1
+featured: true
+stack:
+  - Python
+  - Azure Durable Functions
+  - Azure API Management
+  - Cosmos DB
+  - Key Vault
+  - Event Hub
+  - Application Insights
+  - AWS Bedrock (Claude)
+  - Adobe Firefly
+metrics:
+  - value: 65+
+    label: Durable Functions in production
+  - value: '6'
+    label: AI services orchestrated
+  - value: 300+
+    label: ad creatives a month
+  - value: 20%+
+    label: fewer regenerations
+---
+
+import SystemDiagram from '../../components/SystemDiagram';
+
+## Context
+
+Dentsu makes advertising for some of the world's largest brands. This platform turns a creative brief into finished ad creatives, images and video, using generative AI. It serves three global brands at once, and each one has to stay completely isolated from the others. I architected its backend.
+
+## The problem
+
+Generating a creative is not one model call. It is a chain: write the prompt, find where the product can sit in a scene, composite the real product in, score the result against the brand's rules, and upload the assets. That is six AI services, each with its own latency and its own ways of failing, all sitting behind an API gateway with a fixed request timeout.
+
+No single model is the hard part. The hard part is keeping the whole chain reliable.
+
+## Architecture
+
+<SystemDiagram client:visible id="genai-platform" />
+
+Try the two "break it" scenarios. They show what happens when things go wrong, which is where most of the engineering went.
+
+## Key decisions
+
+### One stage per poll, so nothing waits on the gateway
+
+AI stages can take longer than Azure API Management allows for a single request, and a request that runs past that limit comes back as a 504. Instead of one long request, the pipeline is a state machine: each poll advances one stage and returns. Together with deferring asset uploads out of the request path, this keeps every call inside the gateway timeout. The 504 failures we tracked in Application Insights went down.
+
+### A 3-tier LLM fallback
+
+Model APIs fail through rate limits, outages and timeouts. Every LLM call can fall back through three tiers, so a failing provider costs some latency instead of costing the user their creative.
+
+### Tenant isolation everywhere
+
+Three brands share one platform and must never see each other's data or configuration. Every request carries a JWT that identifies the tenant. Secrets are stored per tenant in Key Vault, and quotas and feature flags are per tenant.
+
+### Quality as a pipeline stage
+
+Every creative is scored by an LLM-as-judge and then reviewed by a person. I turned each brand's guideline PDFs into rule sets in Cosmos DB, so the judge checks against that brand's actual rules rather than a generic idea of "good". This cut regenerations by more than 20%.
+
+### Provider-agnostic video
+
+Video generation goes through a layer that doesn't depend on any one provider (it currently supports TikTok and Veo), and Event Hub schedules the uploads. Adding or swapping a provider doesn't touch the pipeline.
+
+## Results
+
+- **300+ ad creatives a month** for 3 global brands, from one multi-tenant backend
+- **20%+ fewer regenerations** after brand rules were built into quality scoring
+- **Fewer 504s**, thanks to the stage-per-poll design and deferred uploads
+- Product-true imagery taken from R&D to production ([that story is here](/work/product-true-image-generation))
+
+On the same team, I also built a GitHub Copilot skill that reviews large pull requests in several passes and reports findings at four severity levels. The whole team now uses it.

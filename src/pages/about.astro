@@ -1,0 +1,273 @@
+---
+import FallbackToy from '../components/FallbackToy';
+import Logo from '../components/Logo.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+
+const stops = [
+  {
+    city: 'Kolkata',
+    years: '2019 – 2023',
+    title: 'Engineering, and teaching on the side',
+    body: 'B.Tech in Electronics and Communication Engineering at Techno Main Salt Lake (CGPA 9.15). Outside the syllabus I learned data structures and algorithms in C++, built my first websites, and taught students.',
+  },
+  {
+    city: 'Jaipur',
+    years: '2022 – 2025',
+    title: 'Celebal Technologies',
+    body: 'I joined while finishing my degree and stayed three years: document AI for financial firms, a call-analytics platform, and an ML SaaS product at a million requests a day. I worked directly with clients from requirements to delivery and mentored 8 junior developers.',
+  },
+  {
+    city: 'Gurugram',
+    years: '2025 – now',
+    title: 'Dentsu',
+    body: "I architect the backend of Dentsu's GenAI creative platform: multi-tenant, 65+ Durable Functions, six AI services, and a lot of thought about what happens when one of them fails.",
+  },
+];
+
+const principles = [
+  {
+    title: 'Reliability is the feature',
+    body: 'A demo that works once is easy. I design for the timeout, the rate limit and the bad model output, because in production they are certain to happen.',
+  },
+  {
+    title: 'Measure it',
+    body: 'LLM-as-judge scoring, graded evaluations, Application Insights: if quality or failures matter, they get a number.',
+  },
+  {
+    title: 'Own it end to end',
+    body: 'From the requirements call with the client to the CI/CD pipeline, and helping the next engineer get good at it too.',
+  },
+];
+---
+
+<BaseLayout
+  title="About"
+  og="about"
+  description={`About ${site.name}: backend engineer, AI systems builder, occasional teacher.`}
+>
+  <section class="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-16 sm:px-6 sm:pt-24 lg:grid-cols-[1fr_300px]">
+    <div>
+      <p class="font-mono text-sm text-accent-ink">// about</p>
+      <h1 class="mt-3 font-display text-5xl font-semibold tracking-tight sm:text-7xl">Hi, I'm Maharshi.</h1>
+      <div class="mt-6 flex flex-wrap items-center gap-3">
+        <p class="text-lg text-muted">
+          It's said <span class="font-medium text-text">muh-HAR-shee</span>. At home everyone calls me{' '}
+          <span class="font-medium text-text">Dhawal</span>.
+        </p>
+        <button
+          type="button"
+          data-say-name
+          class="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-surface px-3.5 text-sm transition hover:border-accent/60"
+        >
+          <svg
+            class="size-4 text-accent"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M11 5 6 9H2v6h4l5 4V5Z"></path>
+            <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"></path>
+          </svg>
+          Hear it <span class="text-muted">(robot voice)</span>
+        </button>
+      </div>
+      <div class="mt-8 max-w-2xl space-y-5 text-lg leading-relaxed">
+        <p>
+          I'm a backend engineer who builds production AI systems: LLM pipelines, retrieval-augmented generation,
+          agents, and the event-driven serverless plumbing that keeps them standing when things go wrong.
+        </p>
+        <p class="text-muted">
+          My path into this ran through an electronics degree, a lot of C++, some teaching, and four years of shipping
+          backends for real clients, which is where I learned that the interesting part of AI engineering is usually
+          everything around the model.
+        </p>
+      </div>
+    </div>
+
+    <!-- ID badge: a stand-in for a photo, swings when you hover it -->
+    <div class="badge-wrap mx-auto w-[260px]" aria-hidden="true">
+      <div class="mx-auto h-16 w-3 rounded-b bg-accent/80"></div>
+      <div class="badge -mt-1 rounded-2xl border border-border bg-surface p-5 shadow-[0_24px_50px_-24px_rgb(0_0_0/0.45)]">
+        <div class="mx-auto -mt-2 mb-4 h-2 w-14 rounded-full bg-surface-2"></div>
+        <div class="flex items-center gap-2">
+          <Logo class="size-6" />
+          <span class="font-mono text-[0.65rem] tracking-widest text-muted uppercase">Access: production</span>
+        </div>
+        <div class="mt-4 grid aspect-square place-items-center rounded-xl bg-[radial-gradient(circle_at_30%_25%,var(--accent),var(--signal))] font-display text-6xl font-semibold text-white">
+          MJ
+        </div>
+        <p class="mt-4 font-display text-xl font-semibold leading-tight">{site.name}</p>
+        <p class="mt-1 text-sm text-muted">{site.role}</p>
+        <div class="mt-4 flex items-center justify-between font-mono text-[0.65rem] text-muted">
+          <span>{site.location}</span>
+          <span class="text-ok">● on call</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="journey">
+    <h2 id="journey" class="font-mono text-sm text-muted">
+      // the route so far
+    </h2>
+    <div class="journey mt-6 rounded-2xl border border-border bg-surface p-5 sm:p-8">
+      <div class="relative mx-2 h-16 sm:mx-8">
+        <div class="absolute inset-x-0 top-1/2 border-t-2 border-dashed border-border"></div>
+        <div
+          class="traveler absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_0_6px_color-mix(in_srgb,var(--accent)_25%,transparent)]"
+          data-traveler
+          style="left: 100%"
+        ></div>
+        {stops.map((stop, i) => (
+          <button
+            type="button"
+            data-stop={i}
+            aria-pressed={i === stops.length - 1 ? 'true' : 'false'}
+            class="stop absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={`left: ${(i / (stops.length - 1)) * 100}%`}
+          >
+            <span class="block size-3 rounded-full border-2 border-muted bg-surface" />
+            <span class="absolute top-6 left-1/2 -translate-x-1/2 text-sm font-medium whitespace-nowrap">
+              {stop.city}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div class="mt-10">
+        {stops.map((stop, i) => (
+          <div data-panel={i} hidden={i !== stops.length - 1}>
+            <p class="font-mono text-xs text-accent-ink">
+              {stop.city} · {stop.years}
+            </p>
+            <h3 class="mt-2 font-display text-2xl font-semibold">{stop.title}</h3>
+            <p class="mt-2 max-w-3xl leading-relaxed text-muted">{stop.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-24 grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2" aria-labelledby="toy">
+    <div>
+      <h2 id="toy" class="font-mono text-sm text-muted">
+        // a toy, because why not
+      </h2>
+      <p class="mt-4 font-display text-3xl font-semibold tracking-tight">Why I put three LLMs behind every call.</p>
+      <p class="mt-4 leading-relaxed text-muted">
+        Model APIs fail through rate limits, outages and timeouts. If one call fails 40% of the time, so do 40% of your
+        requests. Put three independent tiers in a chain and a request only fails when all three do. Drag the slider,
+        send some requests, and watch the colors.
+      </p>
+      <p class="mt-4 leading-relaxed text-muted">
+        This is the same idea behind the fallback in my{' '}
+        <a class="text-accent-ink underline-offset-4 hover:underline" href="/work/genai-creative-platform">
+          GenAI platform case study
+        </a>
+        . Real failures are rarely fully independent, so the math only holds when the tiers don't share the same failure
+        modes.
+      </p>
+    </div>
+    <FallbackToy client:visible />
+  </section>
+
+  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="principles">
+    <h2 id="principles" class="font-mono text-sm text-muted">
+      // how I work
+    </h2>
+    <div class="mt-6 grid gap-5 md:grid-cols-3">
+      {principles.map((item, i) => (
+        <div class="rounded-2xl border border-border bg-surface p-6">
+          <span class="font-mono text-xs text-accent-ink">0{i + 1}</span>
+          <h3 class="mt-3 font-display text-xl font-semibold">{item.title}</h3>
+          <p class="mt-2 leading-relaxed text-muted">{item.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="now">
+    <div class="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+      <h2 id="now" class="font-mono text-sm text-muted">
+        // now
+      </h2>
+      <ul class="mt-4 space-y-2 text-lg leading-relaxed">
+        <li>Building GenAI platforms at Dentsu, in Gurugram.</li>
+        <li>Writing up the hard parts of production LLM systems.</li>
+        <li>Open to senior backend and AI engineering roles, and to freelance projects.</li>
+      </ul>
+      <p class="mt-6 font-mono text-xs text-muted">last updated Oct 2026</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelector('[data-say-name]')?.addEventListener('click', () => {
+      if (!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      // Spelled phonetically so English voices get closer to the real thing
+      const utterance = new SpeechSynthesisUtterance('Muh-harshee. Ishoo. Jus-raaj.');
+      utterance.rate = 0.85;
+      speechSynthesis.speak(utterance);
+    });
+
+    const traveler = document.querySelector<HTMLElement>('[data-traveler]');
+    const stops = document.querySelectorAll<HTMLButtonElement>('[data-stop]');
+    stops.forEach((button) => {
+      button.addEventListener('click', () => {
+        const index = button.dataset.stop!;
+        stops.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+        document.querySelectorAll<HTMLElement>('[data-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.panel !== index;
+        });
+        if (traveler) traveler.style.left = button.style.left;
+      });
+    });
+  });
+</script>
+
+<style>
+  .badge-wrap {
+    transform-origin: 50% 0;
+    animation: settle 2.4s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  }
+  .badge-wrap:hover {
+    animation: swing 1.6s ease-in-out;
+  }
+  @keyframes settle {
+    from {
+      transform: rotate(-9deg);
+    }
+    to {
+      transform: rotate(0);
+    }
+  }
+  @keyframes swing {
+    20% {
+      transform: rotate(6deg);
+    }
+    45% {
+      transform: rotate(-4deg);
+    }
+    70% {
+      transform: rotate(2deg);
+    }
+    to {
+      transform: rotate(0);
+    }
+  }
+  .traveler {
+    transition: left 700ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .stop[aria-pressed='true'] > span:first-child {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .stop:hover > span:first-child {
+    border-color: var(--accent);
+  }
+</style>

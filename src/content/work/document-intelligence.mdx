@@ -1,0 +1,37 @@
+---
+title: Intelligent document processing for financial firms
+short: Document intelligence
+summary: A document-processing backend for financial firms built on Azure Document Intelligence and Azure OpenAI. It handles 30,000+ documents a month at 99.9% uptime and cut manual work by 60%.
+company: Celebal Technologies
+role: Backend lead
+order: 4
+stack:
+  - Python
+  - Azure Document Intelligence
+  - Azure OpenAI
+metrics:
+  - value: 30k+
+    label: documents a month
+  - value: 99.9%
+    label: uptime
+  - value: 60%
+    label: less manual work
+---
+
+import SystemDiagram from '../../components/SystemDiagram';
+
+## Context
+
+Financial firms run on documents, and a lot of their people's time went into reading them and keying data in by hand. I led the backend that automated this.
+
+<SystemDiagram client:visible id="doc-intelligence" />
+
+## What I built
+
+Documents go through Azure Document Intelligence for layout and text, then Azure OpenAI extracts the fields, and the result is structured data the firms' systems can use directly. For financial clients, reliability is the product, so the system runs at 99.9% uptime.
+
+## Results
+
+- **30,000+ documents a month**
+- **99.9% uptime**
+- **60% less manual work**

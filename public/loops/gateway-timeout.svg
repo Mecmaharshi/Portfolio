@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" role="img" aria-label="504 Gateway Timeout: the gateway gives up waiting while the backend is still working">
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .box { fill: #1d2028; stroke: #2c303a; stroke-width: 1.5; }
+    .lbl { fill: #ecebe6; font-size: 13px; }
+    .dim { fill: #9b978d; font-size: 11px; }
+    .out { animation: out 7s infinite; }
+    .back { opacity: 0; animation: back 7s infinite; }
+    .timer { transform-box: fill-box; transform-origin: left; transform: scaleX(0); animation: timer 7s infinite; }
+    .err { opacity: 0; fill: #ff6169; font-size: 14px; font-weight: 700; animation: err 7s infinite; }
+    .work circle { fill: #a196ff; animation: blink 1s infinite; }
+    .work circle:nth-child(2) { animation-delay: .2s; } .work circle:nth-child(3) { animation-delay: .4s; }
+    .note { opacity: 0; animation: note 7s infinite; }
+    @keyframes out {
+      0% { transform: translate(0, 0); opacity: 1; fill: #ff7448; }
+      10% { transform: translate(130px, 0); }
+      18%, 100% { transform: translate(260px, 0); opacity: 0; }
+    }
+    @keyframes back {
+      0%, 60% { transform: translate(130px, 0); opacity: 0; }
+      61% { opacity: 1; }
+      70% { transform: translate(0, 0); opacity: 1; }
+      74%, 100% { transform: translate(0, 0); opacity: 0; }
+    }
+    @keyframes timer { 0%, 10% { transform: scaleX(0); fill: #a196ff; } 55% { fill: #ff7448; } 60% { transform: scaleX(1); fill: #ff6169; } 92% { transform: scaleX(1); fill: #ff6169; } 100% { transform: scaleX(0); } }
+    @keyframes err { 0%, 69% { opacity: 0; } 70%, 92% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes blink { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+    @keyframes note { 0%, 76% { opacity: 0; } 80%, 94% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } .err, .note { opacity: 1; } .timer { transform: scaleX(1); fill: #ff6169; } }
+  </style>
+  <rect width="400" height="225" rx="16" fill="#15171d"/>
+  <text x="20" y="30" class="dim">// 504 gateway timeout</text>
+  <rect x="20" y="72" width="80" height="44" rx="8" class="box"/><text x="60" y="99" text-anchor="middle" class="lbl">client</text>
+  <rect x="150" y="72" width="100" height="44" rx="8" class="box"/><text x="200" y="99" text-anchor="middle" class="lbl">gateway</text>
+  <rect x="290" y="72" width="90" height="44" rx="8" class="box"/><text x="335" y="99" text-anchor="middle" class="lbl">llm job</text>
+  <line x1="100" y1="94" x2="290" y2="94" stroke="#2c303a" stroke-dasharray="4 5"/>
+  <circle class="out" cx="75" cy="94" r="6"/>
+  <circle class="back" cx="75" cy="94" r="6" fill="#ff6169"/>
+  <rect x="150" y="128" width="100" height="6" rx="3" fill="#2c303a"/>
+  <rect class="timer" x="150" y="128" width="100" height="6" rx="3"/>
+  <text x="200" y="152" text-anchor="middle" class="dim">timeout</text>
+  <text class="err" x="60" y="62" text-anchor="middle">504</text>
+  <g class="work"><circle cx="325" cy="132" r="3"/><circle cx="335" cy="132" r="3"/><circle cx="345" cy="132" r="3"/></g>
+  <text class="note dim" x="200" y="196" text-anchor="middle">the job finished. nobody was listening.</text>
+</svg>

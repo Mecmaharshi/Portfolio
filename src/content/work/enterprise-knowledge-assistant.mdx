@@ -1,0 +1,65 @@
+---
+title: 'Enterprise Knowledge Assistant: multi-source agentic RAG'
+short: Agentic RAG assistant
+summary: A LangGraph assistant that sends each part of a question to the right source (SharePoint, Cosmos DB, SQL or the web) and answers with ranked citations. Policy searches went from 10–15 minutes to seconds.
+company: Freelance
+role: Sole architect and backend developer
+order: 2
+featured: true
+stack:
+  - Python
+  - LangGraph
+  - Azure AI Search
+  - SharePoint
+  - Cosmos DB
+  - SQL
+metrics:
+  - value: 4+
+    label: data sources behind one question box
+  - value: 50–100
+    label: concurrent users
+  - value: seconds
+    label: per policy search, down from 10–15 minutes
+---
+
+import SystemDiagram from '../../components/SystemDiagram';
+
+## Context
+
+People at the client spent 10–15 minutes digging for answers to policy questions. The answers were spread across SharePoint documents, databases and the web. I designed and built the assistant that replaced that search, as the sole architect and backend developer.
+
+## The problem
+
+A single retrieval index doesn't fit this problem. Some answers live in documents, some in records, some need a query over SQL, and some need the web. Enterprise permissions also apply: nobody should get an answer drawn from a document they aren't allowed to open.
+
+## Architecture
+
+<SystemDiagram client:visible id="knowledge-assistant" />
+
+## Key decisions
+
+### A router agent, not one big index
+
+A LangGraph router agent splits each question into sub-questions and sends each one to the source that can answer it: SharePoint through Azure AI Search, Cosmos DB, SQL, or the web. The results are ranked and merged into one answer with citations, so every claim can be traced back to its source.
+
+### Access control at retrieval
+
+Document-level RBAC is enforced at retrieval time. Telling the model "don't mention X" happens too late, because by then the content is already in the prompt. Filtering at retrieval means a restricted document never reaches the LLM, so it can't leak into an answer.
+
+### Text-to-SQL, validated
+
+Questions about numbers are answered with SQL that the model generates. Every generated query is validated before it runs.
+
+### Guardrails first
+
+Jailbreak attempts are caught before any retrieval happens. A refused request never touches a data source.
+
+### Measured, not eyeballed
+
+Answer quality is tracked with LLM-graded evaluation. Changes to prompts, retrieval or routing can be checked against a baseline instead of a gut feeling.
+
+## Results
+
+- **Policy search: 10–15 minutes → seconds**
+- **50–100 concurrent users**
+- One question box in front of **4+ sources**, with every answer cited

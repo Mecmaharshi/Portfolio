@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const trace = [
+  { hop: 'edge', status: 'hit', ms: '3ms' },
+  { hop: 'router', status: 'miss', ms: '1ms' },
+  { hop: 'fallback', status: 'none', ms: '0ms' },
+];
+---
+
+<BaseLayout title="Page not found" noindex>
+  <section class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
+    <p class="font-mono text-sm text-accent-ink">404 · request failed</p>
+    <h1 class="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-6xl">This route doesn’t resolve.</h1>
+    <p class="mt-5 max-w-xl text-lg text-muted">
+      I traced the request so you don’t have to. The page may have moved, or the link may have a typo.
+    </p>
+
+    <div
+      class="mt-10 overflow-x-auto rounded-xl border border-border bg-surface p-5 font-mono text-sm"
+      role="img"
+      aria-label="Request trace ending in 404 Not Found"
+    >
+      <p class="trace-line">
+        <span class="text-signal">GET</span> <span data-path>/unknown</span>
+      </p>
+      {trace.map((line) => (
+        <p class="trace-line flex gap-4 text-muted">
+          <span>├─ {line.hop.padEnd(9, ' ')}</span>
+          <span class={line.status === 'hit' ? 'text-ok' : 'text-accent-ink'}>{line.status.padEnd(5, ' ')}</span>
+          <span>{line.ms}</span>
+        </p>
+      ))}
+      <p class="trace-line font-semibold text-accent-ink">└─ 404 Not Found</p>
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a
+        href="/"
+        class="inline-flex h-11 items-center rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
+      >
+        Back to home
+      </a>
+      <button
+        type="button"
+        data-palette-open
+        class="inline-flex h-11 items-center gap-3 rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5"
+      >
+        Search instead{' '}
+        <span class="kbd">
+          <span data-mod-key>Ctrl</span>&nbsp;K
+        </span>
+      </button>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const el = document.querySelector('[data-path]');
+    if (el) el.textContent = location.pathname;
+  });
+</script>
+
+<style>
+  .trace-line {
+    opacity: 0;
+    animation: appear 250ms ease-out forwards;
+  }
+  .trace-line:nth-child(2) {
+    animation-delay: 250ms;
+  }
+  .trace-line:nth-child(3) {
+    animation-delay: 500ms;
+  }
+  .trace-line:nth-child(4) {
+    animation-delay: 750ms;
+  }
+  .trace-line:nth-child(5) {
+    animation-delay: 1050ms;
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

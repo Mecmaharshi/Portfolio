@@ -1,0 +1,96 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWork } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const work = await getWork();
+  return work.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, prev: work[i - 1], next: work[i + 1] },
+  }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { title, summary, company, role, period, metrics, stack } = entry.data;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={title} description={summary} og={`work/${entry.id}`} type="article">
+  <article>
+    <header class="relative">
+      <div
+        class="bg-dots pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_20%_0%,black,transparent_70%)]"
+        aria-hidden="true"
+      ></div>
+      <div class="relative mx-auto max-w-6xl px-4 pt-12 pb-10 sm:px-6 sm:pt-16">
+        <a href="/work" class="font-mono text-sm text-muted transition-colors hover:text-text">
+          ← all work
+        </a>
+        <p class="mt-8 font-mono text-sm text-accent-ink">
+          {company} · {role}
+          {period && ` · ${period}`}
+        </p>
+        <h1
+          class="mt-3 max-w-4xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl"
+          transition:name={`work-title-${entry.id}`}
+        >
+          {title}
+        </h1>
+        <p class="mt-5 max-w-3xl text-lg leading-relaxed text-muted sm:text-xl">{summary}</p>
+
+        {metrics.length > 0 && (
+          <dl class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-4">
+            {metrics.map((metric) => (
+              <div class="flex flex-col gap-1 bg-surface p-5">
+                <dt class="order-2 text-sm leading-snug text-muted">{metric.label}</dt>
+                <dd class="order-1 font-display text-3xl font-semibold tracking-tight">{metric.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        <ul class="mt-6 flex flex-wrap gap-1.5" aria-label="Stack">
+          {stack.map((tech) => (
+            <li class="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-xs text-muted">{tech}</li>
+          ))}
+        </ul>
+      </div>
+    </header>
+
+    <div class="prose-site prose mx-auto max-w-3xl px-4 sm:prose-lg sm:px-6">
+      <Content />
+    </div>
+  </article>
+
+  <nav class="mx-auto mt-20 max-w-6xl px-4 sm:px-6" aria-label="More case studies">
+    <div class="grid gap-4 sm:grid-cols-2">
+      {prev ? (
+        <a
+          href={`/work/${prev.id}`}
+          class="group rounded-2xl border border-border bg-surface p-5 transition hover:border-accent/60"
+        >
+          <span class="font-mono text-xs text-muted">← previous</span>
+          <span class="mt-1 block font-display text-lg font-semibold">{prev.data.title}</span>
+        </a>
+      ) : (
+        <span />
+      )}
+      {next && (
+        <a
+          href={`/work/${next.id}`}
+          class="group rounded-2xl border border-border bg-surface p-5 text-right transition hover:border-accent/60"
+        >
+          <span class="font-mono text-xs text-muted">next →</span>
+          <span class="mt-1 block font-display text-lg font-semibold">{next.data.title}</span>
+        </a>
+      )}
+    </div>
+    <p class="mt-10 text-center text-muted">
+      Building something like this?{' '}
+      <a href="/contact" class="font-medium text-accent-ink underline-offset-4 hover:underline">
+        Let's talk →
+      </a>
+    </p>
+  </nav>
+</BaseLayout>

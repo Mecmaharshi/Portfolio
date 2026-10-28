@@ -1,0 +1,59 @@
+---
+title: Keeping long AI pipelines inside a gateway timeout
+description: Generative AI stages are slow and API gateways are impatient. A stage-per-poll state machine makes every call return in time, with no 504s.
+published: 2026-10-28
+tags: [architecture, azure, llm]
+draft: true
+---
+
+import SystemDiagram from '../../components/SystemDiagram';
+
+Here's a failure every team building on generative AI eventually meets: the pipeline works and the output is good, but the user gets a **504 Gateway Timeout**.
+
+Nothing crashed. The work was simply slower than the gateway in front of it was willing to wait.
+
+## The setup
+
+Our GenAI creative platform sits behind Azure API Management (APIM). One creative goes through several AI stages: write the prompt, find placement surfaces with a vision model, composite the product, score the result. Each stage takes seconds, and some take much longer. Added together, they can easily take longer than the gateway allows for a single request.
+
+The obvious fixes all have problems:
+
+- **Raise the timeout.** You can only raise it so far, and every long-held connection uses capacity for nothing.
+- **Make the models faster.** Not entirely in your control.
+- **Return 202 and let the client poll.** This is the right direction, but if each poll can trigger an arbitrary amount of work, you've just moved the timeout somewhere else.
+
+## Stage per poll
+
+The fix is to make the pipeline a **state machine** where each call advances **one stage**:
+
+```python
+# A simplified sketch of the idea, not production code
+STAGES = ["prompt", "placement", "composite", "score", "done"]
+
+def advance(job):
+    stage = job.stage
+    if stage == "done":
+        return job                      # nothing left to do
+    run_stage(stage, job)               # bounded: one stage, never the whole chain
+    job.stage = STAGES[STAGES.index(stage) + 1]
+    save(job)
+    return job                          # always returns inside the gateway timeout
+```
+
+Every poll from the client does a bounded amount of work and returns. No single call ever holds the gateway open for the whole chain, so there's nothing for the gateway to time out.
+
+<SystemDiagram client:visible id="genai-platform" initial={2} />
+
+## Getting slow work off the request path
+
+The stage machine handles the AI work. The other thing hiding in our tail latency was **asset upload**: large generated files written to storage before the response went back. That doesn't need to block anyone, so uploads are deferred and scheduled separately through Event Hub.
+
+## A fallback for when stages fail
+
+Bounded stages also make failure handling cleaner. When an LLM call in a stage fails, it falls back through three tiers before the stage gives up. Because the stage is small, a retry or fallback costs one stage's time, not the whole pipeline's.
+
+## What changed
+
+The 504s we tracked in Application Insights went down, and the pipeline got easier to reason about: every job has an explicit stage, every stage is retryable on its own, and "where did this creative get stuck?" is a lookup, not an investigation.
+
+If your AI feature sits behind a gateway, it's worth asking: **what's the longest any single call can take?** If the answer is "it depends on the model", you'll eventually hit this too.

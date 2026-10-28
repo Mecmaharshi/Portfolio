@@ -1,0 +1,192 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+// Homepage hero: case studies orbit a central node, with request packets flowing in.
+// Hovering a node highlights its edge and shows its summary; clicking opens the case study.
+interface Props {
+  work: CollectionEntry<'work'>[];
+}
+
+const { work } = Astro.props;
+const C = 220;
+const R = 150;
+const nodes = work.slice(0, 6).map((entry, i, all) => {
+  const angle = (-90 + (360 / all.length) * i) * (Math.PI / 180);
+  const x = C + R * Math.cos(angle);
+  const y = C + R * Math.sin(angle);
+  return { entry, x, y, right: Math.cos(angle) > 0.2, left: Math.cos(angle) < -0.2, below: Math.sin(angle) > 0.5 };
+});
+---
+
+<div class="system-graph" data-system-graph>
+  <svg viewBox="-20 -20 480 480" class="w-full overflow-visible" role="group" aria-label="Case studies">
+    <g data-graph-layer class="transition-transform duration-500 ease-out">
+      <circle cx={C} cy={C} r={R} fill="none" stroke="var(--border)" stroke-dasharray="2 6"></circle>
+      {nodes.map((node, i) => (
+        <line
+          x1={node.x}
+          y1={node.y}
+          x2={C}
+          y2={C}
+          stroke="var(--border)"
+          stroke-width="1.5"
+          data-edge={i}
+          class="transition-[stroke] duration-300"
+        />
+      ))}
+
+      {nodes.map((node, i) => (
+        <circle r="3.5" fill="var(--signal)" opacity="0" aria-hidden="true">
+          <animateMotion
+            dur="2.6s"
+            begin={`${i * 0.43}s`}
+            repeatCount="indefinite"
+            path={`M${node.x} ${node.y} L${C} ${C}`}
+            keyPoints="0;1"
+            keyTimes="0;1"
+            calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+          />
+          <animate
+            attributeName="opacity"
+            values="0;1;1;0"
+            dur="2.6s"
+            begin={`${i * 0.43}s`}
+            repeatCount="indefinite"
+          />
+        </circle>
+      ))}
+
+      <g aria-hidden="true">
+        <circle cx={C} cy={C} r="44" fill="var(--accent)" opacity="0.12" class="pulse"></circle>
+        <rect x={C - 28} y={C - 28} width="56" height="56" rx="14" fill="var(--accent)"></rect>
+        <path
+          d={`M${C - 10} ${C - 10} ${C + 10} ${C} ${C - 10} ${C + 10}`}
+          fill="none"
+          stroke="#fff"
+          stroke-width="3.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+        <circle cx={C - 10} cy={C - 10} r="4.6" fill="#fff"></circle>
+        <circle cx={C - 10} cy={C + 10} r="4.6" fill="#fff"></circle>
+        <circle cx={C + 10} cy={C} r="5.2" fill="#fff"></circle>
+      </g>
+
+      {nodes.map((node, i) => (
+        <a
+          href={`/work/${node.entry.id}`}
+          class="graph-node"
+          data-node={i}
+          data-summary={node.entry.data.summary}
+          aria-label={node.entry.data.title}
+        >
+          <circle cx={node.x} cy={node.y} r="26" fill="transparent" />
+          <circle
+            cx={node.x}
+            cy={node.y}
+            r="9"
+            fill="var(--surface)"
+            stroke="var(--text)"
+            stroke-width="2"
+            class="dot"
+          />
+          <text
+            x={node.right ? node.x + 18 : node.left ? node.x - 18 : node.x}
+            y={node.right || node.left ? node.y + 4.5 : node.below ? node.y + 30 : node.y - 20}
+            text-anchor={node.right ? 'start' : node.left ? 'end' : 'middle'}
+            fill="var(--text)"
+            style="font: 600 13.5px var(--font-sans)"
+          >
+            {node.entry.data.short}
+          </text>
+        </a>
+      ))}
+    </g>
+  </svg>
+  <p class="mt-2 min-h-12 text-center text-sm leading-relaxed text-muted" data-graph-caption aria-live="polite">
+    Every node is a system I've built. Hover to peek, click to open.
+  </p>
+</div>
+
+<style>
+  .graph-node .dot {
+    transition:
+      r 200ms,
+      fill 200ms,
+      stroke 200ms;
+  }
+  .graph-node:hover .dot,
+  .graph-node:focus-visible .dot {
+    r: 12;
+    fill: var(--accent);
+    stroke: var(--accent);
+  }
+  .graph-node:focus-visible {
+    outline: none;
+  }
+  .graph-node text {
+    transition: fill 200ms;
+  }
+  .graph-node:hover text,
+  .graph-node:focus-visible text {
+    fill: var(--accent-ink);
+  }
+  .pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulse 2.6s ease-out infinite;
+  }
+  @keyframes pulse {
+    from {
+      transform: scale(0.7);
+      opacity: 0.35;
+    }
+    to {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const root = document.querySelector<HTMLElement>('[data-system-graph]');
+    if (!root) return;
+    const svg = root.querySelector('svg')!;
+    const layer = root.querySelector<SVGGElement>('[data-graph-layer]')!;
+    const caption = root.querySelector<HTMLElement>('[data-graph-caption]')!;
+    const defaultCaption = caption.textContent;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduce) svg.pauseAnimations();
+
+    root.querySelectorAll<SVGAElement>('[data-node]').forEach((node) => {
+      const edge = root.querySelector<SVGLineElement>(`[data-edge="${node.dataset.node}"]`)!;
+      const enter = () => {
+        edge.style.stroke = 'var(--accent)';
+        caption.textContent = node.dataset.summary ?? '';
+      };
+      const leave = () => {
+        edge.style.stroke = '';
+        caption.textContent = defaultCaption;
+      };
+      node.addEventListener('mouseenter', enter);
+      node.addEventListener('focus', enter);
+      node.addEventListener('mouseleave', leave);
+      node.addEventListener('blur', leave);
+    });
+
+    // The graph drifts a little toward the cursor
+    if (!reduce && matchMedia('(pointer: fine)').matches) {
+      const hero = root.closest('section') ?? root;
+      hero.addEventListener('pointermove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const dx = (e.clientX - rect.left) / rect.width - 0.5;
+        const dy = (e.clientY - rect.top) / rect.height - 0.5;
+        layer.style.transform = `translate(${dx * 14}px, ${dy * 14}px)`;
+      });
+      hero.addEventListener('pointerleave', () => (layer.style.transform = ''));
+    }
+  });
+</script>

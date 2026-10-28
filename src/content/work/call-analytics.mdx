@@ -1,0 +1,39 @@
+---
+title: A call-analytics platform, in the cloud and on-premises
+short: Call analytics
+summary: A Django platform that analyzes 50,000+ customer interactions a month with Azure Speech and Language at 90% accuracy, deployed both in the cloud and in on-premises Docker containers. Manual review went down by 70%.
+company: Celebal Technologies
+role: Delivery
+order: 5
+stack:
+  - Python
+  - Django
+  - Azure Speech
+  - Azure Language
+  - Docker
+metrics:
+  - value: 50k+
+    label: interactions a month
+  - value: 90%
+    label: accuracy
+  - value: 70%
+    label: less manual review
+---
+
+import SystemDiagram from '../../components/SystemDiagram';
+
+## Context
+
+Reviewing customer calls by hand doesn't scale. This platform transcribes and analyzes every interaction, so people only have to look at what matters.
+
+<SystemDiagram client:visible id="call-analytics" />
+
+## What made it interesting
+
+It had to run in two places: in the cloud and **on-premises in Docker containers**. Building one Django platform that deploys to both meant each client could choose where it runs, without a separate codebase for each.
+
+## Results
+
+- **50,000+ interactions a month**
+- **90% accuracy**
+- **70% less manual review**
