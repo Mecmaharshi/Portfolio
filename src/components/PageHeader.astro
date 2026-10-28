@@ -12,10 +12,31 @@ const { eyebrow, title } = Astro.props;
     aria-hidden="true"
   ></div>
   <div class="relative mx-auto max-w-6xl px-4 pt-16 pb-10 sm:px-6 sm:pt-24">
-    <p class="font-mono text-sm text-accent-ink">{eyebrow}</p>
-    <h1 class="mt-3 max-w-3xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl">{title}</h1>
-    <div class="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
+    <p class="enter font-mono text-sm text-accent-ink">{eyebrow}</p>
+    <h1 class="enter mt-3 max-w-3xl font-display text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+      {title}
+    </h1>
+    <div class="enter mt-5 max-w-2xl text-lg leading-relaxed text-muted">
       <slot />
     </div>
   </div>
 </div>
+
+<style>
+  /* Eyebrow, title and intro rise in one after another on page load */
+  .enter {
+    animation: enter 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .enter:nth-child(2) {
+    animation-delay: 80ms;
+  }
+  .enter:nth-child(3) {
+    animation-delay: 160ms;
+  }
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+</style>

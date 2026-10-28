@@ -7,12 +7,35 @@ import { site } from '../data/site';
 import { formatDate, getPosts, getWork } from '../lib/content';
 
 // `to` drives the count-up animation; `value` is the final text everyone ends up seeing.
+// Each number links to the case study that backs it up.
 const stats = [
-  { value: '1M+', to: 1_000_000, label: 'data requests a day through FastAPI services on Azure Functions' },
-  { value: '30k+', to: 30_000, label: 'financial documents processed monthly at 99.9% uptime' },
-  { value: '65+', to: 65, label: 'Durable Functions orchestrating 6 AI services in production' },
-  { value: '20%+', to: 20, label: 'fewer creative regenerations with LLM-as-judge scoring' },
+  {
+    value: '1M+',
+    to: 1_000_000,
+    label: 'data requests a day through FastAPI services on Azure Functions',
+    href: '/work/ml-saas-scale',
+  },
+  {
+    value: '30k+',
+    to: 30_000,
+    label: 'financial documents processed monthly at 99.9% uptime',
+    href: '/work/document-intelligence',
+  },
+  {
+    value: '65+',
+    to: 65,
+    label: 'Durable Functions orchestrating 6 AI services in production',
+    href: '/work/genai-creative-platform',
+  },
+  {
+    value: '20%+',
+    to: 20,
+    label: 'fewer creative regenerations with LLM-as-judge scoring',
+    href: '/work/genai-creative-platform',
+  },
 ];
+
+const headline = 'I build production AI systems that'.split(' ');
 
 const work = await getWork();
 const featured = work.filter((entry) => entry.data.featured);
@@ -29,7 +52,7 @@ const loopPreview = loops.slice(0, 3);
 
     <div class="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-20 pb-16 sm:px-6 sm:pt-28 md:pb-24 lg:grid-cols-[1.3fr_1fr] lg:pt-20">
       <div>
-        <p class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-muted">
+        <p class="hero-in inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-sm text-muted">
           <span class="relative flex size-2">
             <span class="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-60"></span>
             <span class="relative inline-flex size-2 rounded-full bg-ok"></span>
@@ -37,9 +60,16 @@ const loopPreview = loops.slice(0, 3);
           Currently at {site.current.company}, {site.current.doing}
         </p>
 
+        <!-- Words rise in one after another; the accent phrase lands last, then gets underlined -->
         <h1 class="mt-7 font-display text-[2.6rem] leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl xl:text-7xl">
-          I build production AI systems that{' '}
-          <span class="relative inline-block whitespace-nowrap text-accent-ink">
+          {headline.map((word, i) => (
+            <>
+              <span class="word" style={`--i: ${i}`}>
+                {word}
+              </span>{' '}
+            </>
+          ))}
+          <span class="word relative inline-block whitespace-nowrap text-accent-ink" style={`--i: ${headline.length}`}>
             don’t fall over
             <svg
               class="squiggle absolute -bottom-2 left-0 h-3 w-full text-accent"
@@ -57,24 +87,29 @@ const loopPreview = loops.slice(0, 3);
               ></path>
             </svg>
           </span>
-          .
+          <span class="word" style={`--i: ${headline.length}`}>
+            .
+          </span>
         </h1>
 
-        <p class="mt-7 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
+        <p class="hero-in mt-7 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl" style="--d: 650ms">
           I’m {site.shortName}, a backend engineer with 4+ years designing LLM pipelines, RAG and agentic systems, and
           event-driven serverless backends on Azure. Currently at Dentsu; previously at Celebal Technologies.
         </p>
 
-        <div class="mt-9 flex flex-wrap items-center gap-3">
+        <div class="hero-in mt-9 flex flex-wrap items-center gap-3" style="--d: 750ms">
           <a
             href="/work"
-            class="inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5 hover:shadow-lg"
+            class="btn inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            See the work <span aria-hidden="true">→</span>
+            See the work{' '}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
           </a>
           <a
             href="/contact"
-            class="inline-flex h-11 items-center gap-2 rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5 hover:border-muted/50"
+            class="btn inline-flex h-11 items-center gap-2 rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5 hover:border-muted/50"
           >
             Get in touch
           </a>
@@ -89,7 +124,7 @@ const loopPreview = loops.slice(0, 3);
             </span>
           </button>
         </div>
-        <p class="mt-5 text-sm text-muted">
+        <p class="hero-in mt-5 text-sm text-muted" style="--d: 850ms">
           Open to senior backend and AI engineering roles, and to freelance projects.
         </p>
       </div>
@@ -101,18 +136,32 @@ const loopPreview = loops.slice(0, 3);
   </section>
 
   <section class="mx-auto max-w-6xl px-4 sm:px-6" aria-labelledby="numbers">
-    <h2 id="numbers" class="font-mono text-sm text-muted">
+    <h2 id="numbers" class="font-mono text-sm text-muted" data-reveal>
       // by the numbers
     </h2>
-    <dl class="mt-5 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+    <dl
+      class="mt-5 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4"
+      data-reveal-group
+    >
       {stats.map((stat) => (
-        <div class="flex flex-col gap-2 bg-surface p-6">
+        <div class="spotlight group flex flex-col gap-2 bg-surface p-6">
           <dt class="order-2 text-sm leading-snug text-muted">{stat.label}</dt>
-          <dd class="order-1 font-display text-4xl font-semibold tracking-tight">
+          <dd class="order-1 font-display text-4xl font-semibold tracking-tight transition-colors duration-300 group-hover:text-accent-ink">
             <span class="sr-only">{stat.value}</span>
             <span aria-hidden="true" data-count-to={stat.to}>
               {stat.value}
             </span>
+          </dd>
+          <dd class="order-3 mt-auto">
+            <a
+              href={stat.href}
+              class="font-mono text-xs text-muted transition-colors after:absolute after:inset-0 group-hover:text-accent-ink"
+            >
+              see the case study{' '}
+              <span class="arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
           </dd>
         </div>
       ))}
@@ -120,7 +169,7 @@ const loopPreview = loops.slice(0, 3);
   </section>
 
   <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="selected-work">
-    <div class="flex items-end justify-between gap-4">
+    <div class="flex items-end justify-between gap-4" data-reveal>
       <div>
         <h2 id="selected-work" class="font-mono text-sm text-muted">
           // selected work
@@ -130,28 +179,37 @@ const loopPreview = loops.slice(0, 3);
           Each case study comes with an interactive architecture diagram, including the failure modes.
         </p>
       </div>
-      <a href="/work" class="hidden shrink-0 text-sm font-medium text-accent-ink hover:underline sm:block">
-        All {work.length} case studies →
+      <a href="/work" class="ulink hidden shrink-0 text-sm font-medium text-accent-ink sm:block">
+        All {work.length} case studies{' '}
+        <span class="arrow" aria-hidden="true">
+          →
+        </span>
       </a>
     </div>
-    <div class="mt-8 grid gap-5 lg:grid-cols-2">
+    <div class="mt-8 grid gap-5 lg:grid-cols-2" data-reveal-group>
       {featured.map((entry) => (
         <WorkCard entry={entry} large />
       ))}
     </div>
     <a href="/work" class="mt-6 block text-sm font-medium text-accent-ink sm:hidden">
-      All {work.length} case studies →
+      All {work.length} case studies{' '}
+      <span class="arrow" aria-hidden="true">
+        →
+      </span>
     </a>
   </section>
 
   {posts.length > 0 && (
-    <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="latest-writing">
+    <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="latest-writing" data-reveal>
       <div class="flex items-end justify-between gap-4">
         <h2 id="latest-writing" class="font-mono text-sm text-muted">
           // latest writing
         </h2>
-        <a href="/writing" class="text-sm font-medium text-accent-ink hover:underline">
-          All writing →
+        <a href="/writing" class="ulink text-sm font-medium text-accent-ink">
+          All writing{' '}
+          <span class="arrow" aria-hidden="true">
+            →
+          </span>
         </a>
       </div>
       <ul class="mt-5 divide-y divide-border border-y border-border">
@@ -159,7 +217,7 @@ const loopPreview = loops.slice(0, 3);
           <li>
             <a
               href={`/writing/${post.id}`}
-              class="group flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:gap-6"
+              class="group flex flex-col gap-1 py-5 transition-[padding] duration-300 hover:pl-2 sm:flex-row sm:items-baseline sm:gap-6"
             >
               <time class="w-32 shrink-0 font-mono text-sm text-muted" datetime={post.data.published.toISOString()}>
                 {formatDate(post.data.published)}
@@ -174,7 +232,7 @@ const loopPreview = loops.slice(0, 3);
     </section>
   )}
 
-  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="loops-teaser">
+  <section class="mx-auto mt-24 max-w-6xl px-4 sm:px-6" aria-labelledby="loops-teaser" data-reveal>
     <div class="rounded-3xl border border-border bg-surface p-6 sm:p-10">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -186,11 +244,14 @@ const loopPreview = loops.slice(0, 3);
             Little animations of distributed-systems failures. Free to drop into your pull requests.
           </p>
         </div>
-        <a href="/loops" class="text-sm font-medium text-accent-ink hover:underline">
-          See all loops →
+        <a href="/loops" class="ulink text-sm font-medium text-accent-ink">
+          See all loops{' '}
+          <span class="arrow" aria-hidden="true">
+            →
+          </span>
         </a>
       </div>
-      <div class="mt-8 grid gap-4 sm:grid-cols-3">
+      <div class="mt-8 grid gap-4 sm:grid-cols-3" data-reveal-group>
         {loopPreview.map((loop) => (
           <a href={`/loops#${loop.id}`} class="group block">
             <img
@@ -199,29 +260,34 @@ const loopPreview = loops.slice(0, 3);
               width="400"
               height="225"
               loading="lazy"
-              class="w-full rounded-xl transition duration-300 group-hover:-translate-y-1"
+              class="w-full rounded-xl transition duration-300 group-hover:-translate-y-1 group-hover:-rotate-1 group-hover:shadow-[0_18px_40px_-20px_rgb(0_0_0/0.5)]"
             />
-            <span class="mt-2 block text-sm font-medium">{loop.title}</span>
+            <span class="mt-2 block text-sm font-medium transition-colors group-hover:text-accent-ink">
+              {loop.title}
+            </span>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="mx-auto mt-24 max-w-6xl px-4 text-center sm:px-6">
+  <section class="mx-auto mt-24 max-w-6xl px-4 text-center sm:px-6" data-reveal>
     <p class="font-display text-3xl font-semibold tracking-tight text-balance sm:text-5xl">
-      Have a backend that needs to stay up while the AI does its thing?
+      Have a backend that needs to stay up while <span class="marker">the AI does its thing</span>?
     </p>
     <div class="mt-8 flex flex-wrap justify-center gap-3">
       <a
         href="/contact"
-        class="inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
+        class="btn inline-flex h-11 items-center gap-2 rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
       >
-        Start a conversation <span aria-hidden="true">→</span>
+        Start a conversation{' '}
+        <span class="arrow" aria-hidden="true">
+          →
+        </span>
       </a>
       <a
         href="/resume"
-        class="inline-flex h-11 items-center rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5"
+        class="btn inline-flex h-11 items-center rounded-lg border border-border bg-surface px-5 font-medium transition hover:-translate-y-0.5"
       >
         Read the resume
       </a>
@@ -230,10 +296,27 @@ const loopPreview = loops.slice(0, 3);
 </BaseLayout>
 
 <style>
+  .word {
+    display: inline-block;
+    animation: word-in 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 70ms + 80ms);
+  }
+  @keyframes word-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.35em);
+      filter: blur(6px);
+    }
+  }
+  .hero-in {
+    animation: word-in 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+
   /* Hidden until the draw starts: a zero-length dash would otherwise show its round cap as a dot */
   .squiggle path {
     stroke-dasharray: 1;
-    animation: draw 900ms 400ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation: draw 900ms 900ms cubic-bezier(0.65, 0, 0.35, 1) both;
   }
   @keyframes draw {
     from {
@@ -247,5 +330,14 @@ const loopPreview = loops.slice(0, 3);
       stroke-dashoffset: 0;
       opacity: 1;
     }
+  }
+
+  /* Highlighter sweep once the closing section scrolls into view */
+  .marker {
+    background: linear-gradient(color-mix(in srgb, var(--accent) 28%, transparent) 0 0) 0 88% / 0 0.38em no-repeat;
+    transition: background-size 1s 300ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  :global(.revealed) .marker {
+    background-size: 100% 0.38em;
   }
 </style>

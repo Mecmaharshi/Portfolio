@@ -2,7 +2,10 @@ import { navigate } from 'astro:transitions/client';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
+import { releaseChaos } from '../scripts/chaos';
+import { isSoundOn, play, setSound } from '../scripts/sound';
 import { getTheme, toggleTheme } from '../scripts/theme';
+import { toast } from '../scripts/toast';
 
 type Line = { kind: 'in' | 'out' | 'err'; text: ReactNode };
 
@@ -16,6 +19,8 @@ const COMMANDS = [
   'resume',
   'email',
   'theme',
+  'sound',
+  'chaos',
   'socials',
   'clear',
   'exit',
@@ -88,6 +93,8 @@ export default function Terminal({ index }: { index: SiteIndex }) {
           'email             copy my email address',
           'socials           where else to find me',
           'theme [light|dark] switch theme',
+          'sound [on|off]    sound effects',
+          'chaos             release the chaos monkey',
           'clear / exit',
         ].map((text) => ({ kind: 'out', text }));
       case 'whoami':
@@ -133,6 +140,7 @@ export default function Terminal({ index }: { index: SiteIndex }) {
         return [{ kind: 'out', text: 'opening resume PDF…' }];
       case 'email':
         navigator.clipboard?.writeText(site.email).catch(() => {});
+        toast('Email copied');
         return [{ kind: 'out', text: `${site.email} (copied)` }];
       case 'socials':
         return social.map((s) => ({
@@ -151,8 +159,20 @@ export default function Terminal({ index }: { index: SiteIndex }) {
         if (next !== current) toggleTheme();
         return [{ kind: 'out', text: `theme: ${next}` }];
       }
+      case 'sound': {
+        if (arg && arg !== 'on' && arg !== 'off') return [{ kind: 'err', text: 'usage: sound [on|off]' }];
+        const on = arg ? arg === 'on' : !isSoundOn();
+        setSound(on);
+        return [{ kind: 'out', text: `sound: ${on ? 'on' : 'off'}` }];
+      }
+      case 'chaos':
+        setOpen(false);
+        // Let the terminal close first so the page is what gets knocked around
+        setTimeout(releaseChaos, 150);
+        return [];
       case 'sudo':
         if (/hire/.test(arg)) {
+          play('chime');
           setTimeout(() => go('/contact'), 1200);
           return [
             { kind: 'out', text: '[sudo] password for recruiter: ********' },
@@ -176,6 +196,7 @@ export default function Terminal({ index }: { index: SiteIndex }) {
     const result = execute(input);
     if (input.trim()) setHistory((h) => [...h, input]);
     setCursor(-1);
+    if (result !== 'clear') play(result.some((line) => line.kind === 'err') ? 'error' : 'tick');
     setLines((prev) => (result === 'clear' ? [] : [...prev, { kind: 'in', text: input }, ...result]));
     setInput('');
   };
@@ -194,6 +215,7 @@ export default function Terminal({ index }: { index: SiteIndex }) {
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key.length === 1) play('key');
     if (e.key === 'Enter') submit();
     else if (e.key === 'Escape') setOpen(false);
     else if (e.key === 'Tab') {

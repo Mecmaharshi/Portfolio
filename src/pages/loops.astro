@@ -15,19 +15,29 @@ import { site } from '../data/site';
     anywhere an image does: drop one into a pull request, an issue or a README.
   </PageHeader>
 
-  <section class="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
-    {loops.map((loop) => {
+  <section class="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3" data-reveal-group>
+    {loops.map((loop, i) => {
       const url = new URL(`/loops/${loop.id}.svg`, site.url).href;
       return (
-        <figure id={loop.id} class="group scroll-mt-24 rounded-2xl border border-border bg-surface p-3">
-          <img
-            src={`/loops/${loop.id}.svg`}
-            alt={`${loop.title}: ${loop.caption}`}
-            width="400"
-            height="225"
-            loading="lazy"
-            class="w-full rounded-xl"
-          />
+        <figure
+          id={loop.id}
+          class="spotlight group scroll-mt-24 rounded-2xl border border-border bg-surface p-3 transition duration-300 hover:-translate-y-1 hover:border-accent/60"
+        >
+          <button
+            type="button"
+            data-lightbox-open={i}
+            aria-label={`Enlarge ${loop.title}`}
+            class="block w-full cursor-zoom-in overflow-hidden rounded-xl"
+          >
+            <img
+              src={`/loops/${loop.id}.svg`}
+              alt={`${loop.title}: ${loop.caption}`}
+              width="400"
+              height="225"
+              loading="lazy"
+              class="w-full rounded-xl transition duration-500 group-hover:scale-[1.02]"
+            />
+          </button>
           <figcaption class="px-2 pt-4 pb-2">
             <h2 class="font-display text-lg font-semibold">{loop.title}</h2>
             <p class="mt-1 text-sm leading-relaxed text-muted">{loop.caption}</p>
@@ -56,21 +66,136 @@ import { site } from '../data/site';
 
   <p class="mx-auto mt-12 max-w-6xl px-4 text-sm text-muted sm:px-6">
     Got a failure mode that deserves a loop?{' '}
-    <a class="text-accent-ink underline-offset-4 hover:underline" href="/contact">
+    <a class="ulink text-accent-ink" href="/contact">
       Suggest one
     </a>
     .
   </p>
+
+  <dialog
+    data-lightbox
+    aria-label="Loop viewer"
+    class="lightbox m-auto w-[min(92vw,960px)] max-w-none rounded-2xl border border-border bg-surface p-0 text-text shadow-2xl backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+  >
+    <div class="p-3">
+      <img
+        data-lightbox-img
+        src={`/loops/${loops[0].id}.svg`}
+        alt=""
+        width="400"
+        height="225"
+        loading="lazy"
+        class="w-full rounded-xl"
+      />
+      <div class="flex flex-col gap-4 px-2 pt-4 pb-1 sm:flex-row sm:items-start">
+        <div class="min-w-0 sm:flex-1">
+          <h2 data-lightbox-title class="font-display text-xl font-semibold"></h2>
+          <p data-lightbox-caption class="mt-1 text-sm leading-relaxed text-muted"></p>
+        </div>
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <button
+            type="button"
+            data-copy=""
+            data-lightbox-copy
+            class="rounded-md border border-border px-2.5 py-1 text-muted transition-colors hover:border-accent/60 hover:text-text"
+          >
+            copy markdown
+          </button>
+          <button
+            type="button"
+            data-lightbox-step="-1"
+            aria-label="Previous loop"
+            class="rounded-md border border-border px-2.5 py-1 text-muted transition-colors hover:border-accent/60 hover:text-text"
+          >
+            ←
+          </button>
+          <span data-lightbox-count class="text-muted tabular-nums"></span>
+          <button
+            type="button"
+            data-lightbox-step="1"
+            aria-label="Next loop"
+            class="rounded-md border border-border px-2.5 py-1 text-muted transition-colors hover:border-accent/60 hover:text-text"
+          >
+            →
+          </button>
+          <button
+            type="button"
+            data-lightbox-close
+            aria-label="Close"
+            class="rounded-md border border-border px-2.5 py-1 text-muted transition-colors hover:border-accent/60 hover:text-text"
+          >
+            esc
+          </button>
+        </div>
+      </div>
+    </div>
+  </dialog>
 </BaseLayout>
 
 <script>
+  import { loops } from '../data/loops';
+  import { site } from '../data/site';
+  import { play } from '../scripts/sound';
+  import { toast } from '../scripts/toast';
+
+  // Lightbox: a native <dialog>, so Esc, focus and the inert page come for free
+  function initLightbox() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+    if (!dialog) return;
+    const img = dialog.querySelector<HTMLImageElement>('[data-lightbox-img]')!;
+    const title = dialog.querySelector('[data-lightbox-title]')!;
+    const caption = dialog.querySelector('[data-lightbox-caption]')!;
+    const count = dialog.querySelector('[data-lightbox-count]')!;
+    const copy = dialog.querySelector<HTMLButtonElement>('[data-lightbox-copy]')!;
+    let current = 0;
+
+    const show = (i: number) => {
+      current = (i + loops.length) % loops.length;
+      const loop = loops[current];
+      img.src = `/loops/${loop.id}.svg`;
+      img.alt = `${loop.title}: ${loop.caption}`;
+      title.textContent = loop.title;
+      caption.textContent = loop.caption;
+      count.textContent = `${current + 1}/${loops.length}`;
+      copy.dataset.copy = `![${loop.title}](${new URL(`/loops/${loop.id}.svg`, site.url).href})`;
+      img.animate([{ opacity: 0.3 }, { opacity: 1 }], { duration: 250, easing: 'ease-out' });
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-lightbox-open]').forEach((button) =>
+      button.addEventListener('click', () => {
+        show(Number(button.dataset.lightboxOpen));
+        dialog.showModal();
+        play('pop');
+      }),
+    );
+    dialog.querySelectorAll<HTMLButtonElement>('[data-lightbox-step]').forEach((button) =>
+      button.addEventListener('click', () => {
+        show(current + Number(button.dataset.lightboxStep));
+        play('tick');
+      }),
+    );
+    dialog.querySelector('[data-lightbox-close]')!.addEventListener('click', () => dialog.close());
+    // A click on the backdrop lands on the <dialog> itself
+    dialog.addEventListener('click', (e) => e.target === dialog && dialog.close());
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        show(current + (e.key === 'ArrowLeft' ? -1 : 1));
+        play('tick');
+      }
+    });
+  }
+
   document.addEventListener('astro:page-load', () => {
+    initLightbox();
     document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
       button.addEventListener('click', async () => {
         const label = button.textContent;
         try {
           await navigator.clipboard.writeText(button.dataset.copy!);
           button.textContent = 'copied ✓';
+          play('chime');
+          toast(button.dataset.copy!.startsWith('!') ? 'Markdown copied' : 'URL copied');
         } catch {
           button.textContent = 'copy failed';
         }

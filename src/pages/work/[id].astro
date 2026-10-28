@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import ReadingProgress from '../../components/ReadingProgress.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getWork } from '../../lib/content';
 
@@ -14,9 +15,17 @@ export async function getStaticPaths() {
 const { entry, prev, next } = Astro.props;
 const { title, summary, company, role, period, metrics, stack } = entry.data;
 const { Content } = await render(entry);
+
+// Numeric metrics ("65+", "20%+", "30k+") count up; the rest ("seconds", "R&D → prod") just appear
+const countTo = (value: string) => {
+  const m = value.match(/^\+?(\d+(?:\.\d+)?)(k|M)?[+%]*$/);
+  if (!m) return undefined;
+  return Number(m[1]) * (m[2] === 'k' ? 1e3 : m[2] === 'M' ? 1e6 : 1);
+};
 ---
 
 <BaseLayout title={title} description={summary} og={`work/${entry.id}`} type="article">
+  <ReadingProgress />
   <article>
     <header class="relative">
       <div
@@ -40,19 +49,29 @@ const { Content } = await render(entry);
         <p class="mt-5 max-w-3xl text-lg leading-relaxed text-muted sm:text-xl">{summary}</p>
 
         {metrics.length > 0 && (
-          <dl class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-4">
+          <dl
+            class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-4"
+            data-reveal-group
+          >
             {metrics.map((metric) => (
-              <div class="flex flex-col gap-1 bg-surface p-5">
+              <div class="spotlight flex flex-col gap-1 bg-surface p-5">
                 <dt class="order-2 text-sm leading-snug text-muted">{metric.label}</dt>
-                <dd class="order-1 font-display text-3xl font-semibold tracking-tight">{metric.value}</dd>
+                <dd class="order-1 font-display text-3xl font-semibold tracking-tight">
+                  <span class="sr-only">{metric.value}</span>
+                  <span aria-hidden="true" data-count-to={countTo(metric.value)}>
+                    {metric.value}
+                  </span>
+                </dd>
               </div>
             ))}
           </dl>
         )}
 
-        <ul class="mt-6 flex flex-wrap gap-1.5" aria-label="Stack">
+        <ul class="mt-6 flex flex-wrap gap-1.5" aria-label="Stack" data-reveal-group>
           {stack.map((tech) => (
-            <li class="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-xs text-muted">{tech}</li>
+            <li class="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/60 hover:text-text">
+              {tech}
+            </li>
           ))}
         </ul>
       </div>
@@ -64,13 +83,15 @@ const { Content } = await render(entry);
   </article>
 
   <nav class="mx-auto mt-20 max-w-6xl px-4 sm:px-6" aria-label="More case studies">
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-4 sm:grid-cols-2" data-reveal-group>
       {prev ? (
         <a
           href={`/work/${prev.id}`}
-          class="group rounded-2xl border border-border bg-surface p-5 transition hover:border-accent/60"
+          class="spotlight group rounded-2xl border border-border bg-surface p-5 transition hover:border-accent/60"
         >
-          <span class="font-mono text-xs text-muted">← previous</span>
+          <span class="font-mono text-xs text-muted">
+            <span class="inline-block transition-transform group-hover:-translate-x-1">←</span> previous
+          </span>
           <span class="mt-1 block font-display text-lg font-semibold">{prev.data.title}</span>
         </a>
       ) : (
@@ -79,16 +100,21 @@ const { Content } = await render(entry);
       {next && (
         <a
           href={`/work/${next.id}`}
-          class="group rounded-2xl border border-border bg-surface p-5 text-right transition hover:border-accent/60"
+          class="spotlight group rounded-2xl border border-border bg-surface p-5 text-right transition hover:border-accent/60"
         >
-          <span class="font-mono text-xs text-muted">next →</span>
+          <span class="font-mono text-xs text-muted">
+            next{' '}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </span>
           <span class="mt-1 block font-display text-lg font-semibold">{next.data.title}</span>
         </a>
       )}
     </div>
     <p class="mt-10 text-center text-muted">
       Building something like this?{' '}
-      <a href="/contact" class="font-medium text-accent-ink underline-offset-4 hover:underline">
+      <a href="/contact" class="font-medium text-accent-ink ulink">
         Let's talk →
       </a>
     </p>

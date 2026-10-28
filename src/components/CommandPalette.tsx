@@ -4,13 +4,17 @@ import { Command } from 'cmdk';
 import { useEffect, useState } from 'react';
 import { resumePdf, site, social } from '../data/site';
 import type { SiteIndex } from '../lib/nav';
+import { releaseChaos } from '../scripts/chaos';
+import { isSoundOn, play, toggleSound } from '../scripts/sound';
 import { toggleTheme } from '../scripts/theme';
+import { toast } from '../scripts/toast';
 
 // Opened with ⌘K / Ctrl+K, or by any element with [data-palette-open] (see scripts/ui.ts,
 // which dispatches the 'palette:open' window event).
 export default function CommandPalette({ index }: { index: SiteIndex }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -20,15 +24,24 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
       }
     };
     const onOpen = () => setOpen(true);
+    const onSound = () => setSoundOn(isSoundOn());
+    onSound();
     document.addEventListener('keydown', onKey);
     window.addEventListener('palette:open', onOpen);
+    window.addEventListener('sound:change', onSound);
     return () => {
       document.removeEventListener('keydown', onKey);
       window.removeEventListener('palette:open', onOpen);
+      window.removeEventListener('sound:change', onSound);
     };
   }, []);
 
+  useEffect(() => {
+    if (open) play('pop');
+  }, [open]);
+
   const run = (action: () => void) => {
+    play('select');
     setOpen(false);
     action();
   };
@@ -37,6 +50,7 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
     try {
       await navigator.clipboard.writeText(site.email);
       setCopied(true);
+      toast('Email copied');
       setTimeout(() => {
         setCopied(false);
         setOpen(false);
@@ -88,10 +102,20 @@ export default function CommandPalette({ index }: { index: SiteIndex }) {
             onSelect={() => run(() => toggleTheme())}
           />
           <Item
+            label={soundOn ? 'Turn sound effects off' : 'Turn sound effects on'}
+            keywords={['sound', 'audio', 'mute', 'sfx']}
+            onSelect={() => run(toggleSound)}
+          />
+          <Item
             label="Open the terminal"
             hint="`"
             keywords={['shell', 'console', 'cli', 'secret']}
             onSelect={() => run(() => window.dispatchEvent(new Event('terminal:open')))}
+          />
+          <Item
+            label="Release the chaos monkey"
+            keywords={['chaos', 'break', 'fun', 'secret', 'easter egg']}
+            onSelect={() => run(() => setTimeout(releaseChaos, 200))}
           />
         </Command.Group>
         <Command.Group heading="Elsewhere">

@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 
 // Homepage hero: case studies orbit a central node, with request packets flowing in.
 // Hovering a node highlights its edge and shows its summary; clicking opens the case study.
+// On load it "boots": the center appears, edges draw outward, then the nodes pop in.
 interface Props {
   work: CollectionEntry<'work'>[];
 }
@@ -21,7 +22,7 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
 <div class="system-graph" data-system-graph>
   <svg viewBox="-20 -20 480 480" class="w-full overflow-visible" role="group" aria-label="Case studies">
     <g data-graph-layer class="transition-transform duration-500 ease-out">
-      <circle cx={C} cy={C} r={R} fill="none" stroke="var(--border)" stroke-dasharray="2 6"></circle>
+      <circle cx={C} cy={C} r={R} fill="none" stroke="var(--border)" stroke-dasharray="2 6" class="boot-ring"></circle>
       {nodes.map((node, i) => (
         <line
           x1={node.x}
@@ -30,8 +31,10 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
           y2={C}
           stroke="var(--border)"
           stroke-width="1.5"
+          pathLength="1"
           data-edge={i}
-          class="transition-[stroke] duration-300"
+          class="boot-edge transition-[stroke] duration-300"
+          style={`--i: ${i}`}
         />
       ))}
 
@@ -39,7 +42,7 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
         <circle r="3.5" fill="var(--signal)" opacity="0" aria-hidden="true">
           <animateMotion
             dur="2.6s"
-            begin={`${i * 0.43}s`}
+            begin={`${1.6 + i * 0.43}s`}
             repeatCount="indefinite"
             path={`M${node.x} ${node.y} L${C} ${C}`}
             keyPoints="0;1"
@@ -51,13 +54,13 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
             attributeName="opacity"
             values="0;1;1;0"
             dur="2.6s"
-            begin={`${i * 0.43}s`}
+            begin={`${1.6 + i * 0.43}s`}
             repeatCount="indefinite"
           />
         </circle>
       ))}
 
-      <g aria-hidden="true">
+      <g aria-hidden="true" class="boot-center">
         <circle cx={C} cy={C} r="44" fill="var(--accent)" opacity="0.12" class="pulse"></circle>
         <rect x={C - 28} y={C - 28} width="56" height="56" rx="14" fill="var(--accent)"></rect>
         <path
@@ -76,7 +79,8 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
       {nodes.map((node, i) => (
         <a
           href={`/work/${node.entry.id}`}
-          class="graph-node"
+          class="graph-node boot-node"
+          style={`--i: ${i}`}
           data-node={i}
           data-summary={node.entry.data.summary}
           aria-label={node.entry.data.title}
@@ -132,6 +136,47 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
   .graph-node:focus-visible text {
     fill: var(--accent-ink);
   }
+  .boot-ring {
+    animation: boot-fade 800ms 100ms both;
+  }
+  .boot-center {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: boot-pop 600ms cubic-bezier(0.2, 0.9, 0.3, 1.4) 150ms both;
+  }
+  .boot-edge {
+    stroke-dasharray: 1;
+    animation: boot-draw 600ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-delay: calc(var(--i) * 90ms + 450ms);
+  }
+  .boot-node {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: boot-pop 500ms cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+    animation-delay: calc(var(--i) * 90ms + 750ms);
+  }
+  @keyframes boot-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes boot-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+  @keyframes boot-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .caption-swap {
+    animation: boot-fade 250ms ease-out;
+  }
   .pulse {
     transform-box: fill-box;
     transform-origin: center;
@@ -163,13 +208,19 @@ const nodes = work.slice(0, 6).map((entry, i, all) => {
 
     root.querySelectorAll<SVGAElement>('[data-node]').forEach((node) => {
       const edge = root.querySelector<SVGLineElement>(`[data-edge="${node.dataset.node}"]`)!;
+      const setCaption = (text: string | null) => {
+        caption.textContent = text;
+        caption.classList.remove('caption-swap');
+        void caption.offsetWidth; // restart the fade
+        caption.classList.add('caption-swap');
+      };
       const enter = () => {
         edge.style.stroke = 'var(--accent)';
-        caption.textContent = node.dataset.summary ?? '';
+        setCaption(node.dataset.summary ?? '');
       };
       const leave = () => {
         edge.style.stroke = '';
-        caption.textContent = defaultCaption;
+        setCaption(defaultCaption);
       };
       node.addEventListener('mouseenter', enter);
       node.addEventListener('focus', enter);

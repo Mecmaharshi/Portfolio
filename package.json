@@ -12,7 +12,8 @@
     "check": "astro check",
     "format": "prettier --write .",
     "astro": "astro",
-    "resume:pdf": "node scripts/resume-pdf.mjs"
+    "resume:pdf": "node scripts/resume-pdf.mjs",
+    "check:html": "node scripts/check-html.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.5",
@@ -31,8 +32,6 @@
     "@types/react-dom": "^19.3.0",
     "astro": "^7.4.2",
     "cmdk": "^1.1.1",
-    "gsap": "^3.15.0",
-    "motion": "^14.7.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "satori": "^0.63.2",

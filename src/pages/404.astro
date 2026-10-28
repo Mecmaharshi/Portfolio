@@ -20,6 +20,7 @@ const trace = [
       class="mt-10 overflow-x-auto rounded-xl border border-border bg-surface p-5 font-mono text-sm"
       role="img"
       aria-label="Request trace ending in 404 Not Found"
+      data-trace
     >
       <p class="trace-line">
         <span class="text-signal">GET</span> <span data-path>/unknown</span>
@@ -33,11 +34,12 @@ const trace = [
       ))}
       <p class="trace-line font-semibold text-accent-ink">└─ 404 Not Found</p>
     </div>
+    <p class="sr-only" aria-live="polite" data-retry-status></p>
 
     <div class="mt-10 flex flex-wrap gap-3">
       <a
         href="/"
-        class="inline-flex h-11 items-center rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
+        class="btn inline-flex h-11 items-center rounded-lg bg-text px-5 font-medium text-bg transition hover:-translate-y-0.5"
       >
         Back to home
       </a>
@@ -51,14 +53,56 @@ const trace = [
           <span data-mod-key>Ctrl</span>&nbsp;K
         </span>
       </button>
+      <!-- A joke for the curious: retries with exponential backoff, then gives up like a good client should -->
+      <button
+        type="button"
+        data-retry
+        class="inline-flex h-11 items-center gap-2 rounded-lg px-4 font-mono text-sm text-muted transition-colors hover:text-text disabled:cursor-not-allowed"
+      >
+        ↻ retry with backoff
+      </button>
     </div>
   </section>
 </BaseLayout>
 
 <script>
+  import { play } from '../scripts/sound';
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   document.addEventListener('astro:page-load', () => {
     const el = document.querySelector('[data-path]');
     if (el) el.textContent = location.pathname;
+
+    const button = document.querySelector<HTMLButtonElement>('[data-retry]');
+    const trace = document.querySelector<HTMLElement>('[data-trace]');
+    const status = document.querySelector<HTMLElement>('[data-retry-status]');
+    if (!button || !trace || !status) return;
+
+    const line = (html: string) => {
+      const p = document.createElement('p');
+      p.className = 'retry-line text-muted';
+      p.innerHTML = html;
+      trace.append(p);
+      return p;
+    };
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      // The original last hop is no longer the end of the tree
+      const end = [...trace.querySelectorAll('p')].at(-1);
+      if (end) end.textContent = end.textContent!.replace('└─', '├─');
+      for (const [i, seconds] of [1, 2, 4].entries()) {
+        const p = line(`├─ retry ${i + 1}&nbsp;&nbsp;waiting ${seconds}s<span class="dots"></span>`);
+        status.textContent = `Retry ${i + 1}, waiting ${seconds} seconds`;
+        await wait(seconds * 1000);
+        p.innerHTML = `├─ retry ${i + 1}&nbsp;&nbsp;waited ${seconds}s&nbsp;&nbsp;<span class="text-accent-ink">404</span>`;
+        play('fail');
+      }
+      line('<span class="font-semibold text-danger">└─ circuit open: gave up after 3 retries</span>');
+      status.textContent = 'Gave up after 3 retries. The page really does not exist.';
+      button.textContent = '✕ circuit open';
+    });
   });
 </script>
 
@@ -78,6 +122,27 @@ const trace = [
   }
   .trace-line:nth-child(5) {
     animation-delay: 1050ms;
+  }
+  :global(.retry-line) {
+    animation: appear 250ms ease-out both;
+  }
+  :global(.retry-line .dots)::after {
+    content: '';
+    animation: dots 1.2s steps(4) infinite;
+  }
+  @keyframes dots {
+    0% {
+      content: '';
+    }
+    25% {
+      content: '.';
+    }
+    50% {
+      content: '..';
+    }
+    75% {
+      content: '...';
+    }
   }
   @keyframes appear {
     from {

@@ -12,6 +12,7 @@ const links = Astro.props.pages.filter((item) => item.href !== '/');
 ---
 
 <header
+  data-site-header
   data-no-print
   transition:animate="none"
   class="sticky top-0 z-40 border-b border-border/70 bg-bg/80 backdrop-blur-md"
@@ -35,9 +36,16 @@ const links = Astro.props.pages.filter((item) => item.href !== '/');
                 <a
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
-                  class="relative rounded-md px-3 py-2 text-sm text-muted transition-colors hover:text-text aria-[current=page]:text-text aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-3 aria-[current=page]:after:-bottom-[13px] aria-[current=page]:after:h-0.5 aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-accent"
+                  class="relative rounded-md px-3 py-2 text-sm text-muted transition-colors after:absolute after:inset-x-3 after:-bottom-[13px] after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-border after:transition-transform after:duration-300 hover:text-text hover:after:scale-x-100 aria-[current=page]:text-text aria-[current=page]:after:hidden"
                 >
                   {item.label}
+                  {/* Shares a transition name across pages, so it slides to the new link on navigation */}
+                  {active && (
+                    <span
+                      class="absolute inset-x-3 -bottom-[13px] h-0.5 rounded-full bg-accent"
+                      transition:name="nav-indicator"
+                    />
+                  )}
                 </a>
               </li>
             );
@@ -68,6 +76,42 @@ const links = Astro.props.pages.filter((item) => item.href !== '/');
         <span class="kbd hidden sm:inline-flex">
           <span data-mod-key>Ctrl</span>&nbsp;K
         </span>
+      </button>
+
+      <button
+        type="button"
+        data-sound-toggle
+        aria-pressed="false"
+        class="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-text"
+        aria-label="Sound effects"
+        title="Sound effects"
+      >
+        <svg
+          class="size-[18px] sound-on:hidden"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M11 5 6 9H2v6h4l5 4V5Z"></path>
+          <path d="m22 9-6 6M16 9l6 6"></path>
+        </svg>
+        <svg
+          class="hidden size-[18px] sound-on:block"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M11 5 6 9H2v6h4l5 4V5Z"></path>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"></path>
+        </svg>
       </button>
 
       <button
